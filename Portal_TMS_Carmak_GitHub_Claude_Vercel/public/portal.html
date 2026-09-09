@@ -2109,11 +2109,25 @@ async function loadModularTrackingStatus(){
   return qiveTracking.modularConfigured;
 }
 async function loadCarrierTrackingStatuses(){return Promise.all([loadTwTrackingStatus(),loadSswTrackingStatus(),loadSaoMiguelTrackingStatus(),loadModularTrackingStatus()])}
+// A São Miguel bloqueou a credencial por excesso de chamadas simultâneas
+// (múltiplos workers do rastreio automático batendo na API ao mesmo tempo).
+// O espaçamento configurável do próprio conector (SAOMIGUEL_REQUEST_INTERVAL_MS)
+// só vale por instância de servidor — não impede duas instâncias concorrentes
+// de chamarem juntas. Serializamos aqui, no único ponto que enxerga todos os
+// workers ao mesmo tempo, com uma folga real entre uma chamada e a próxima.
+const SAOMIGUEL_MIN_GAP_MS=5000;
+let saoMiguelChain=Promise.resolve();
+function serializeSaoMiguel(task){
+  const run=saoMiguelChain.then(task,task);
+  saoMiguelChain=run.catch(()=>{}).then(()=>new Promise(resolve=>setTimeout(resolve,SAOMIGUEL_MIN_GAP_MS)));
+  return run;
+}
 async function fetchCarrierTrackingPayload(connector,nfeKey){
   const cacheKey=`${connector.endpoint}:${nfeKey}`;
   const existing=qiveTracking.trackingLookupCache.get(cacheKey);
   if(existing&&Date.now()-existing.at<TRACKING_REFRESH_MS)return existing.promise;
-  const promise=fetch(connector.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chave_nfe:nfeKey})}).then(async response=>({ok:response.ok,payload:await response.json().catch(()=>({}))}));
+  const request=()=>fetch(connector.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chave_nfe:nfeKey})}).then(async response=>({ok:response.ok,payload:await response.json().catch(()=>({}))}));
+  const promise=connector.key==='saomiguel'?serializeSaoMiguel(request):request();
   qiveTracking.trackingLookupCache.set(cacheKey,{at:Date.now(),promise});
   try{return await promise}catch(error){qiveTracking.trackingLookupCache.delete(cacheKey);throw error}
 }
