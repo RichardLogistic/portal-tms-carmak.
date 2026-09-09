@@ -1716,10 +1716,15 @@ function nfeDeliveryLocation(nfe){
   const address=addressLabel(delivery,'');
   const name=party.name||nfe.receiver?.name||'';
   const city=[delivery.city,delivery.uf].filter(Boolean).join('/');
+  // deliveryNote só existe quando a NF-e não tem bloco <entrega> nem endereço
+  // de entrega estruturado — nesse caso o "delivery" acima é só o endereço
+  // cadastrado do destinatário, um sinal mais fraco que uma observação
+  // explícita de entrega. Por isso a observação tem prioridade aqui.
   const note=String(nfe.operational?.deliveryNote||'').trim();
-  const label=[name,address].filter(Boolean).join(' — ')||city||note;
+  const usingNote=Boolean(note);
+  const label=usingNote?note:([name,address].filter(Boolean).join(' — ')||city);
   if(!label)return null;
-  return {label,source:nfe.operational?.deliverySource||'NF-e · Qive',detailed:Boolean(delivery.street||delivery.district||delivery.zipCode),city:city||'Destino a confirmar',name,address:delivery,fromNote:Boolean(note&&!address&&!city)};
+  return {label,source:nfe.operational?.deliverySource||'NF-e · Qive',detailed:usingNote||Boolean(delivery.street||delivery.district||delivery.zipCode),city:city||'Destino a confirmar',name,address:delivery,fromNote:usingNote};
 }
 function deliveryLocation(doc){
   const locations=linkedNfeReferences(doc).map(item=>({...item.delivery,nfeNumber:item.number,accessKey:item.accessKey})).filter(item=>item.label);
