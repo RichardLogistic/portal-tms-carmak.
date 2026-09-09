@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fetchWithRetry, integrationHealth, recordIntegrationCheck } from "@/lib/integration-http";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -648,6 +649,7 @@ export async function GET() {
     trackingRules: {
       excludedCarrierCnpjs: configuredHfsCnpjs(),
     },
+    ...integrationHealth("qive"),
   });
 }
 
@@ -732,7 +734,7 @@ export async function POST(request: NextRequest) {
   const startedAt = Date.now();
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${configuration.baseUrl}${QIVE_ENDPOINTS[documentType]}`,
       {
         method: "POST",
@@ -759,6 +761,7 @@ export async function POST(request: NextRequest) {
             )
           : "";
 
+      recordIntegrationCheck("qive", false, "QIVE_REQUEST_FAILED");
       return NextResponse.json(
         {
           success: false,
@@ -774,6 +777,7 @@ export async function POST(request: NextRequest) {
     const rawDocuments = normalizeDocuments(payload, documentType) || [];
     const responseData = payload as Record<string, unknown>;
 
+    recordIntegrationCheck("qive", true);
     return NextResponse.json({
       success: true,
       documentType,
@@ -791,12 +795,16 @@ export async function POST(request: NextRequest) {
       },
       durationMs: Date.now() - startedAt,
     });
-  } catch {
+  } catch (error) {
+    const timedOut = error instanceof Error && error.name === "TimeoutError";
+    recordIntegrationCheck("qive", false, timedOut ? "QIVE_TIMEOUT" : "QIVE_UNAVAILABLE");
     return NextResponse.json(
       {
         success: false,
-        code: "QIVE_UNAVAILABLE",
-        message: "Não foi possível alcançar a API da Qive neste momento.",
+        code: timedOut ? "QIVE_TIMEOUT" : "QIVE_UNAVAILABLE",
+        message: timedOut
+          ? "A consulta à Qive excedeu o tempo limite. O portal tentará novamente na próxima atualização."
+          : "Não foi possível alcançar a API da Qive neste momento.",
       },
       { status: 502 },
     );

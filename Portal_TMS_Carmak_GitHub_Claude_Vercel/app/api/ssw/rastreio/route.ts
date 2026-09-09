@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fetchWithRetry, integrationHealth, recordIntegrationCheck } from "@/lib/integration-http";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -44,6 +45,7 @@ export async function GET() {
       confirmation: "returned_tracking_events",
     },
     authentication: process.env.SSW_API_TOKEN ? "token" : "public",
+    ...integrationHealth("ssw"),
   });
 }
 
@@ -68,16 +70,20 @@ export async function POST(request: NextRequest) {
   if (token) headers.Authorization = `Bearer ${token}`;
 
   try {
-    const response = await fetch(trackingUrl(), {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ chave_nfe: accessKey }),
-      cache: "no-store",
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
+    const response = await fetchWithRetry(
+      trackingUrl(),
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ chave_nfe: accessKey }),
+        cache: "no-store",
+      },
+      { timeoutMs: REQUEST_TIMEOUT_MS, budgetMs: REQUEST_TIMEOUT_MS * 2 },
+    );
     const payload = (await response.json().catch(() => null)) as TrackingPayload | null;
 
     if (!response.ok) {
+      recordIntegrationCheck("ssw", false, "SSW_UPSTREAM_ERROR");
       return NextResponse.json(
         {
           success: false,
@@ -90,6 +96,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!payload || payload.success === false) {
+      recordIntegrationCheck("ssw", false, "SSW_NOT_FOUND");
       return NextResponse.json(
         { success: false, message: safeMessage(payload), provider: "SSW" },
         { status: 404 },
@@ -101,6 +108,7 @@ export async function POST(request: NextRequest) {
         ? payload.documento
         : { header: {}, tracking: [] };
 
+    recordIntegrationCheck("ssw", true);
     return NextResponse.json({
       success: true,
       source: "SSW_API",
@@ -113,6 +121,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     const timedOut = error instanceof Error && error.name === "TimeoutError";
+    recordIntegrationCheck("ssw", false, timedOut ? "SSW_TIMEOUT" : "SSW_UNAVAILABLE");
 
     return NextResponse.json(
       {
