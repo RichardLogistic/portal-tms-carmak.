@@ -125,6 +125,9 @@ test("preserva integrações fiscais e mantém rotas dinâmicas no servidor", as
     "../app/api/tw/rastreio/route.ts",
     "../app/api/saomiguel/rastreio/route.ts",
     "../app/api/saomiguel/comprovantes/route.ts",
+    "../app/api/modular/rastreio/route.ts",
+    "../app/api/modular/empresas/route.ts",
+    "../app/api/modular/comprovantes/route.ts",
   ]) {
     const source = await readFile(new URL(route, import.meta.url), "utf8");
     assert.match(source, /export const dynamic = "force-dynamic"/);
