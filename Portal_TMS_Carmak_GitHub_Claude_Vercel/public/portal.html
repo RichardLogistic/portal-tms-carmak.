@@ -2056,7 +2056,7 @@ async function loadQiveNfeOrdersForTracking(period){
   }catch{}finally{
     qiveTracking.orderLoading=false;
     renderQiveCtesForTracking();
-    if(document.getElementById('reports')?.classList.contains('active'))renderReports();
+    if(document.getElementById('reports')?.classList.contains('active'))renderReports();if(document.getElementById('dashboard')?.classList.contains('active'))renderDashboard();
   }
 }
 async function loadTwTrackingStatus(){
@@ -2170,7 +2170,7 @@ async function updateCarrierTrackingAutomatically(){
   Object.keys(labels).forEach(key=>{if(!labels[key]||!totals[key])return;const result=progress[key];if(key==='ssw'){const confirmed=carrierTrackingOverview(qiveTracking.documents).filter(carrier=>carrier.sswTracked).length;labels[key].textContent=`SSW · ${confirmed} transportadora${confirmed===1?'':'s'} confirmada${confirmed===1?'':'s'} · ${result.updated} CT-e${result.updated===1?'':'s'} atualizado${result.updated===1?'':'s'}`}else labels[key].textContent=result.failed?`${carrierLabels[key]} · ${result.updated} atualizado${result.updated===1?'':'s'} · ${result.failed} sem retorno`:`${carrierLabels[key]} · ${result.updated} atualizado${result.updated===1?'':'s'}`});
   updateQiveTrackingKpis(qiveTracking.documents);
   renderQiveCtesForTracking();
-  if(document.getElementById('reports')?.classList.contains('active'))renderReports();
+  if(document.getElementById('reports')?.classList.contains('active'))renderReports();if(document.getElementById('dashboard')?.classList.contains('active'))renderDashboard();
 }
 function scheduleNextTrackingUpdate(){qiveTracking.nextSyncAt=Date.now()+TRACKING_REFRESH_MS;updateTrackingCountdown()}
 function updateTrackingCountdown(){
