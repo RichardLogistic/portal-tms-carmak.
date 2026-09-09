@@ -595,33 +595,28 @@ body.light-theme #reports .export-options{background:#fff}body.light-theme #repo
 
   <section id="dashboard" class="page active">
     <div class="toolbar">
-      <div class="field"><label>Filial</label><select id="filterBranch"><option value="">Todas as filiais</option><option value="0001">São Leopoldo/RS</option><option value="0002">Camaçari/BA</option><option value="0003">Horizontina/RS</option><option value="0004">Panambi/RS</option><option value="0005">Itajaí/SC</option><option value="0006">Sumaré/SP</option><option value="0007">Chapecó/SC</option><option value="0009">Triunfo/RS</option><option value="0010">Duque de Caxias/RJ</option><option>São Leopoldo</option><option>Sumaré</option><option>Itajaí</option><option>Chapecó</option><option>Panambi</option></select></div>
-      <div class="field"><label>Transportadora</label><select id="filterCarrier"><option value="all">Todas</option><option>Transduarte</option><option>TW Transportes</option><option>Modular</option><option>Mengue</option><option>Braspress</option></select></div>
-      <div class="field"><label>Período</label><input type="text" value="01/08/2026 - 31/08/2026"></div>
-      <div class="field"><label>Tipo de operação</label><select><option>Todas</option><option>Fracionado</option><option>Dedicado</option><option>Plataforma</option></select></div>
+      <div class="field"><label>Filial</label><select id="filterBranch"><option value="">Todas as filiais</option></select></div>
+      <div class="field"><label>Transportadora</label><select id="filterCarrier"><option value="all">Todas</option></select></div>
+      <div class="field"><label>Período</label><input type="text" id="dashPeriodDisplay" readonly placeholder="Definido na aba Rastreamento"></div>
+      <div class="field"><label>Tipo de operação</label><select id="filterOperation"><option value="all">Todas</option><option value="Frete de envio">Frete de envio</option><option value="Recebimento por compra">Recebimento por compra</option><option value="Transferência">Transferência</option><option value="Outro">Outro</option></select></div>
       <button class="btn btn-outline" id="advancedBtn">☷ Filtros avançados</button>
       <button class="btn btn-primary" id="widgetBtn">＋ Adicionar widget</button>
     </div>
-    <div class="card widget-panel" id="widgetPanel"><div class="card-h"><h3>Personalizar dashboard</h3></div><div class="card-b chips"><span class="chip" data-widget="kpi-on-time">Entregas no prazo</span><span class="chip" data-widget="kpi-late">Entregas atrasadas</span><span class="chip" data-widget="kpi-transit">Em trânsito</span><span class="chip" data-widget="kpi-pending">NF-e pendentes</span><span class="chip" data-widget="kpi-cost">Custo total</span><span class="chip" data-widget="kpi-otd">OTD</span></div></div>
+    <div class="card widget-panel" id="widgetPanel"><div class="card-h"><h3>Personalizar dashboard</h3></div><div class="card-b chips"><span class="chip" data-widget="kpi-on-time">Entregas no prazo</span><span class="chip" data-widget="kpi-late">Entregas atrasadas</span><span class="chip" data-widget="kpi-transit">Em trânsito</span><span class="chip" data-widget="kpi-pending">Sem rastreamento</span><span class="chip" data-widget="kpi-cost">Custo total</span><span class="chip" data-widget="kpi-otd">OTD</span></div></div>
     <div class="kpis">
-      <div class="kpi" id="kpi-on-time"><div class="kpi-top"><div><small>Entregas no prazo</small><strong>1.248</strong><span style="color:var(--green)">78,6% do total</span></div><span class="ico green">▣</span></div><div class="spark"><svg viewBox="0 0 100 25"><polyline fill="none" stroke="#61cf45" stroke-width="2" points="0,18 8,16 14,20 20,7 27,13 34,5 42,15 50,8 58,12 65,4 72,9 80,7 88,12 100,5"/></svg></div></div>
-      <div class="kpi" id="kpi-late"><div class="kpi-top"><div><small>Entregas atrasadas</small><strong>214</strong><span>13,5% do total</span></div><span class="ico red">△</span></div><div class="spark"><svg viewBox="0 0 100 25"><polyline fill="none" stroke="#ff4d50" stroke-width="2" points="0,9 8,16 15,8 22,5 30,13 38,7 46,15 54,8 62,12 70,9 80,16 90,12 100,17"/></svg></div></div>
-      <div class="kpi" id="kpi-transit"><div class="kpi-top"><div><small>Em trânsito</small><strong>126</strong><span style="color:var(--blue)">7,9% do total</span></div><span class="ico blue">↝</span></div><div class="spark"><svg viewBox="0 0 100 25"><polyline fill="none" stroke="#48a8ff" stroke-width="2" points="0,18 8,13 16,17 24,7 32,15 40,5 48,12 56,16 64,7 72,15 80,7 90,14 100,9"/></svg></div></div>
-      <div class="kpi" id="kpi-pending"><div class="kpi-top"><div><small>NF-e pendentes</small><strong>38</strong><span>Aguardando entrega</span></div><span class="ico orange">▤</span></div><div class="spark"><svg viewBox="0 0 100 25"><polyline fill="none" stroke="#ff9a3d" stroke-width="2" points="0,17 8,9 16,13 24,6 32,15 40,9 48,11 56,7 64,14 72,8 80,13 90,11 100,15"/></svg></div></div>
-      <div class="kpi" id="kpi-cost"><div class="kpi-top"><div><small>Custo total frete</small><strong>R$ 1.248.560</strong><span style="color:var(--green)">+8,3% vs período anterior</span></div><span class="ico green">$</span></div><div class="spark"><svg viewBox="0 0 100 25"><polyline fill="none" stroke="#61cf45" stroke-width="2" points="0,16 8,12 16,17 24,7 32,14 40,4 48,15 56,9 64,13 72,6 80,12 90,8 100,9"/></svg></div></div>
-      <div class="kpi" id="kpi-otd"><div class="kpi-top"><div><small>OTD (No prazo)</small><strong>92,4%</strong><span style="color:var(--green)">+3,2% vs período anterior</span></div><span class="ico green">◎</span></div><div class="spark"><svg viewBox="0 0 100 25"><polyline fill="none" stroke="#61cf45" stroke-width="2" points="0,17 8,10 16,14 24,5 32,15 40,6 48,12 56,7 64,12 72,10 80,11 90,8 100,9"/></svg></div></div>
+      <div class="kpi" id="kpi-on-time"><div class="kpi-top"><div><small>Entregas no prazo</small><strong id="dashKpiOnTime">0</strong><span id="dashKpiOnTimeSub" style="color:var(--green)">—</span></div><span class="ico green">▣</span></div></div>
+      <div class="kpi" id="kpi-late"><div class="kpi-top"><div><small>Entregas atrasadas</small><strong id="dashKpiLate">0</strong><span id="dashKpiLateSub">—</span></div><span class="ico red">△</span></div></div>
+      <div class="kpi" id="kpi-transit"><div class="kpi-top"><div><small>Em trânsito</small><strong id="dashKpiTransit">0</strong><span id="dashKpiTransitSub" style="color:var(--blue)">—</span></div><span class="ico blue">↝</span></div></div>
+      <div class="kpi" id="kpi-pending"><div class="kpi-top"><div><small>Sem rastreamento</small><strong id="dashKpiPending">0</strong><span id="dashKpiPendingSub">—</span></div><span class="ico orange">▤</span></div></div>
+      <div class="kpi" id="kpi-cost"><div class="kpi-top"><div><small>Custo total frete (Carmak paga)</small><strong id="dashKpiCost">R$ 0</strong><span id="dashKpiCostSub" style="color:var(--muted)">—</span></div><span class="ico green">$</span></div></div>
+      <div class="kpi" id="kpi-otd"><div class="kpi-top"><div><small>OTD (no prazo)</small><strong id="dashKpiOtd">—</strong><span id="dashKpiOtdSub" style="color:var(--muted)">—</span></div><span class="ico green">◎</span></div></div>
     </div>
     <div class="grid">
-      <div class="card"><div class="card-h"><h3>Entregas por status</h3></div><div class="card-b donut-wrap"><div class="donut"><div class="donut-center"><div><b style="font-size:22px">1.588</b><br><small>Total</small></div></div></div><div class="legend"><div>🟩 Entregues<br><b>1.248 (78,6%)</b></div><div>🟦 Em trânsito<br><b>126 (7,9%)</b></div><div>🟥 Atrasadas<br><b>214 (13,5%)</b></div></div></div></div>
-      <div class="card"><div class="card-h"><h3>Entrega no prazo por transportadora</h3></div><div class="card-b"><div class="barrow"><span>Transduarte</span><div class="barbg"><div class="barfill" style="width:96%"></div></div><b>96,2%</b></div><div class="barrow"><span>TW</span><div class="barbg"><div class="barfill" style="width:93%"></div></div><b>93,1%</b></div><div class="barrow"><span>Modular</span><div class="barbg"><div class="barfill" style="width:91%"></div></div><b>91,4%</b></div><div class="barrow"><span>Mengue</span><div class="barbg"><div class="barfill" style="width:88%"></div></div><b>88,7%</b></div><div class="barrow"><span>Braspress</span><div class="barbg"><div class="barfill" style="width:85%"></div></div><b>85,3%</b></div></div></div>
-      <div class="card"><div class="card-h"><h3>Custo de frete por filial</h3></div><div class="card-b columns"><div class="col"><div style="height:150px"></div>R$ 420k<br>S. Leopoldo</div><div class="col"><div style="height:115px"></div>R$ 310k<br>Sumaré</div><div class="col"><div style="height:85px"></div>R$ 210k<br>Itajaí</div><div class="col"><div style="height:72px"></div>R$ 180k<br>Chapecó</div><div class="col"><div style="height:52px"></div>R$ 128k<br>Panambi</div></div></div>
+      <div class="card"><div class="card-h"><h3>Entregas por status</h3></div><div class="card-b donut-wrap"><div class="donut" id="dashDonut"><div class="donut-center"><div><b id="dashDonutTotal" style="font-size:22px">0</b><br><small>Total</small></div></div></div><div class="legend" id="dashDonutLegend"></div></div></div>
+      <div class="card"><div class="card-h"><h3>Entrega no prazo por transportadora</h3></div><div class="card-b" id="dashCarrierBars"><div class="tracking-carrier-empty">Sem dados suficientes no período.</div></div></div>
+      <div class="card"><div class="card-h"><h3>Custo de frete por filial</h3></div><div class="card-b columns" id="dashBranchCost"></div></div>
     </div>
-    <div class="row2">
-      <div class="card"><div class="card-h"><h3>Alertas críticos</h3><a style="color:var(--green);font-size:11px">Ver todos</a></div><div class="card-b"><div class="list-item"><span class="status-dot red"></span><div><b>NF-e 47125 - Atrasada</b><br><small>Transduarte · Sumaré → Chapecó</small></div><span class="badge late">2 dias</span></div><div class="list-item"><span class="status-dot orange"></span><div><b>NF-e 47132 - Sem movimentação</b><br><small>TW · Itajaí → Sumaré</small></div><span class="badge risk">Desde 19/07</span></div><div class="list-item"><span class="status-dot orange"></span><div><b>NF-e 47145 - Risco de atraso</b><br><small>Modular · S. Leopoldo → Camaçari</small></div><span class="badge risk">1 dia</span></div><div class="list-item"><span class="status-dot blue"></span><div><b>7 NF-e aguardando comprovante</b><br><small>Diversas transportadoras</small></div><span class="badge info">Aguardando</span></div></div></div>
-      <div class="card"><div class="card-h"><h3>IA & Análises - Insights</h3><a style="color:var(--green);font-size:11px">Ver todos</a></div><div class="card-b"><div class="insight"><div class="bubble">♙</div><div><b>Custo acima do padrão</b><br><small>12 fretes acima do histórico da rota Sumaré → Chapecó.</small></div></div><div class="insight"><div class="bubble">✓</div><div><b>Padrão de atraso identificado</b><br><small>Mengue com 18,7% de atraso na rota Itajaí → Panambi.</small></div></div><div class="insight"><div class="bubble">✣</div><div><b>Consolidação sugerida</b><br><small>23 entregas podem ser consolidadas, economia estimada de R$ 7.320.</small></div></div></div></div>
-      <div class="card"><div class="card-h"><h3>Performance por período</h3></div><div class="card-b linechart"><svg viewBox="0 0 520 210"><line x1="35" y1="180" x2="510" y2="180" stroke="#315040"/><line x1="35" y1="25" x2="35" y2="180" stroke="#315040"/><polyline fill="rgba(54,201,119,.10)" stroke="#43bd57" stroke-width="3" points="35,110 65,72 95,61 125,67 155,52 185,63 215,45 245,57 275,41 305,48 335,43 365,62 395,57 425,56 455,56 485,47 510,42 510,180 35,180"/><polyline fill="none" stroke="#ff5f62" stroke-width="3" points="35,147 65,158 95,159 125,143 155,157 185,170 215,156 245,164 275,161 305,165 335,155 365,158 395,155 425,159 455,147 485,155 510,156"/></svg></div></div>
-    </div>
-    <div class="card bottom-strip"><div class="bottom-item"><small>Conciliação de faturas</small><strong style="color:var(--orange)">5 pendências</strong></div><div class="bottom-item"><small>CT-e não conciliados</small><strong style="color:var(--red)">18 documentos</strong></div><div class="bottom-item"><small>Economia identificada (IA)</small><strong style="color:var(--green)">R$ 25.770,00</strong></div><div class="bottom-item"><small>Taxa de ocupação</small><strong style="color:var(--blue)">78,6%</strong></div><div class="bottom-item"><small>Usuários online</small><strong style="color:var(--purple)">12 usuários</strong></div></div>
+    <div class="card" style="margin-top:12px"><div class="card-h"><h3>Alertas de prazo</h3></div><div class="card-b" id="dashAlerts"><div class="tracking-carrier-empty">Nenhum alerta no período.</div></div></div>
   </section>
 
   <section id="tracking" class="page">
@@ -1364,7 +1359,7 @@ body.light-theme #reports .export-options{background:#fff}body.light-theme #repo
 <div class="toast" id="toast"></div>
 <script>
 const pages=document.querySelectorAll('.page');const navBtns=document.querySelectorAll('[data-page]');
-function openPage(id){pages.forEach(p=>p.classList.toggle('active',p.id===id));navBtns.forEach(b=>b.classList.toggle('active',b.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'});if(id==='tracking')setTimeout(()=>loadQiveCtesForTracking({silent:true}),0);if(id==='reports')setTimeout(initializeReports,0)}
+function openPage(id){pages.forEach(p=>p.classList.toggle('active',p.id===id));navBtns.forEach(b=>b.classList.toggle('active',b.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'});if(id==='dashboard')setTimeout(initializeDashboardPage,0);if(id==='tracking')setTimeout(()=>loadQiveCtesForTracking({silent:true}),0);if(id==='reports')setTimeout(initializeReports,0)}
 navBtns.forEach(b=>b.addEventListener('click',()=>openPage(b.dataset.page)));
 const toast=document.getElementById('toast');function showToast(msg){toast.textContent=msg;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2600)}
 document.getElementById('syncBtn').onclick=()=>qiveSyncDocuments(true);
@@ -2385,6 +2380,7 @@ async function qiveSyncDocuments(silent=false){
 qiveSyncButton?.addEventListener('click',()=>qiveSyncDocuments());
 qiveConnectorAction?.addEventListener('click',()=>{openPage('integrations');document.getElementById('qiveConsoleTitle')?.scrollIntoView({behavior:'smooth',block:'start'});qiveSyncDocuments()});
 loadQiveStatus();
+initializeDashboardPage();
 setInterval(()=>{if(document.visibilityState==='visible'&&qiveConfigured)qiveSyncDocuments(true)},15*60*1000);
 setInterval(()=>{if(document.visibilityState==='visible'&&document.getElementById('tracking')?.classList.contains('active'))loadQiveCtesForTracking({silent:true,force:true})},TRACKING_REFRESH_MS);
 
@@ -2631,11 +2627,113 @@ async function initializeReports(){
   if(!reportState.initialized){bindReportEvents();reportState.initialized=true;refreshReportDestinations();renderReports()}
   if(!qiveConfigured)await loadQiveStatus();if(qiveConfigured&&(!qiveTracking.documents.length||qiveTracking.periodKey!==`${reportFrom?.value||''}:${reportTo?.value||''}`))await loadQiveCtesForTracking({silent:true,force:true});refreshReportDestinations();renderReports();
 }
+function dashboardFilteredRows(){
+  const rows=qiveReportData();
+  const branchSelect=document.getElementById('filterBranch');
+  const carrierValue=document.getElementById('filterCarrier')?.value||'all';
+  const operationValue=document.getElementById('filterOperation')?.value||'all';
+  return rows.filter(row=>reportBranchMatches(row,branchSelect)&&(carrierValue==='all'||row.carrier===carrierValue)&&(operationValue==='all'||row.operation===operationValue));
+}
+function dashboardDocumentsFor(rows){
+  const keys=new Set(rows.map(row=>row.accessKey));
+  const documents=(qiveTracking.allDocuments?.length?qiveTracking.allDocuments:qiveTracking.documents)||[];
+  return documents.filter(doc=>keys.has(String(doc.accessKey||'')));
+}
+function populateDashboardFilters(){
+  const branchSelect=document.getElementById('filterBranch');
+  if(branchSelect){
+    const current=branchSelect.value,branches=configuredCarmakBranches().sort((a,b)=>a.label.localeCompare(b.label,'pt-BR'));
+    branchSelect.innerHTML='<option value="">Todas as filiais</option>'+branches.map(item=>`<option value="${esc(item.cnpj)}">${esc(item.label)}</option>`).join('');
+    if(branches.some(item=>item.cnpj===current))branchSelect.value=current;
+  }
+  const carrierSelect=document.getElementById('filterCarrier');
+  if(carrierSelect){
+    const current=carrierSelect.value,rows=qiveReportData(),values=Array.from(new Set(rows.map(row=>row.carrier).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    carrierSelect.innerHTML='<option value="all">Todas</option>'+values.map(value=>`<option value="${esc(value)}">${esc(value)}</option>`).join('');
+    if(values.includes(current))carrierSelect.value=current;
+  }
+  const periodField=document.getElementById('dashPeriodDisplay');
+  if(periodField)periodField.value=qiveTracking.from&&qiveTracking.to?`${reportDate(qiveTracking.from)} - ${reportDate(qiveTracking.to)}`:'';
+}
+function renderDashboardCarrierBars(rows){
+  const container=document.getElementById('dashCarrierBars');
+  if(!container)return;
+  const groups=new Map();
+  rows.forEach(row=>{
+    const key=row.carrier||'Não informada';
+    if(!groups.has(key))groups.set(key,{name:key,total:0,onTime:0,late:0});
+    const group=groups.get(key);group.total+=1;
+    if(row.sla==='No prazo')group.onTime+=1;
+    if(row.sla==='Atrasada')group.late+=1;
+  });
+  const carriers=Array.from(groups.values()).filter(group=>group.onTime+group.late>0).map(group=>({...group,pct:group.onTime/(group.onTime+group.late)*100})).sort((a,b)=>b.total-a.total).slice(0,5);
+  container.innerHTML=carriers.length?carriers.map(group=>`<div class="barrow"><span>${esc(group.name)}</span><div class="barbg"><div class="barfill" style="width:${group.pct.toFixed(1)}%"></div></div><b>${group.pct.toLocaleString('pt-BR',{maximumFractionDigits:1})}%</b></div>`).join(''):'<div class="tracking-carrier-empty">Sem dados suficientes no período.</div>';
+}
+function renderDashboardBranchCost(rows){
+  const container=document.getElementById('dashBranchCost');
+  if(!container)return;
+  const groups=new Map();
+  rows.filter(row=>row.paidByCarmak===true).forEach(row=>{
+    const key=row.branch||'Não identificada';
+    groups.set(key,(groups.get(key)||0)+reportNumber(row.freight));
+  });
+  const branches=Array.from(groups.entries()).map(([name,value])=>({name,value})).sort((a,b)=>b.value-a.value).slice(0,5);
+  const max=Math.max(1,...branches.map(item=>item.value));
+  container.innerHTML=branches.length?branches.map(item=>`<div class="col"><div style="height:${Math.max(4,Math.round(item.value/max*150))}px"></div>R$ ${(item.value/1000).toLocaleString('pt-BR',{maximumFractionDigits:0})}k<br>${esc(item.name)}</div>`).join(''):'<div class="tracking-carrier-empty">Sem dados suficientes no período.</div>';
+}
+function renderDashboardAlerts(rows){
+  const container=document.getElementById('dashAlerts');
+  if(!container)return;
+  const alerts=rows.filter(row=>row.sla==='Atrasada'||row.sla==='Em risco').sort((a,b)=>(a.sla==='Atrasada'?0:1)-(b.sla==='Atrasada'?0:1)).slice(0,6);
+  container.innerHTML=alerts.length?alerts.map(row=>{
+    const late=row.sla==='Atrasada';
+    return `<div class="list-item"><span class="status-dot ${late?'red':'orange'}"></span><div><b>CT-e ${esc(row.cte||String(row.accessKey||'').slice(-6))} · ${esc(row.carrier||'Transportadora não identificada')}</b><br><small>${esc(row.branch||'Filial não identificada')} → ${esc(row.destination||'Destino não identificado')}</small></div><span class="badge ${late?'late':'risk'}">${late?'Atrasada':'Em risco'}${row.forecast?' · '+esc(reportDate(row.forecast)):''}</span></div>`;
+  }).join(''):'<div class="tracking-carrier-empty">Nenhum alerta no período.</div>';
+}
+function renderDashboard(){
+  const rows=dashboardFilteredRows();
+  const docs=dashboardDocumentsFor(rows);
+  const total=rows.length;
+  const kinds=docs.map(doc=>trackingStatus(doc).kind);
+  const delivered=kinds.filter(kind=>kind==='delivered').length;
+  const transit=kinds.filter(kind=>kind==='transit').length;
+  const occurrence=kinds.filter(kind=>kind==='occurrence').length;
+  const noTracking=kinds.filter(kind=>kind==='pending'||kind==='fiscal').length;
+  const slaRows=rows.filter(row=>row.sla!=='Sem previsão');
+  const onTime=rows.filter(row=>row.sla==='No prazo').length;
+  const late=rows.filter(row=>row.sla==='Atrasada').length;
+  const freight=rows.filter(row=>row.paidByCarmak===true).reduce((sum,row)=>sum+reportNumber(row.freight),0);
+  const otd=slaRows.length?onTime/slaRows.length*100:null;
+  const pct=count=>total?`${(count/total*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}% do total`:'Sem CT-es no período';
+  const setText=(id,value)=>{const element=document.getElementById(id);if(element)element.textContent=value};
+  setText('dashKpiOnTime',onTime.toLocaleString('pt-BR'));setText('dashKpiOnTimeSub',pct(onTime));
+  setText('dashKpiLate',late.toLocaleString('pt-BR'));setText('dashKpiLateSub',pct(late));
+  setText('dashKpiTransit',transit.toLocaleString('pt-BR'));setText('dashKpiTransitSub',pct(transit));
+  setText('dashKpiPending',noTracking.toLocaleString('pt-BR'));setText('dashKpiPendingSub',pct(noTracking));
+  setText('dashKpiCost','R$ '+reportMoney(freight));setText('dashKpiCostSub',total?`${total.toLocaleString('pt-BR')} CT-e${total===1?'':'s'} no período`:'Sem CT-es no período');
+  setText('dashKpiOtd',otd==null?'—':otd.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%');setText('dashKpiOtdSub',slaRows.length?`${slaRows.length.toLocaleString('pt-BR')} CT-es com previsão`:'Nenhum CT-e com previsão');
+  const donut=document.getElementById('dashDonut'),donutTotal=document.getElementById('dashDonutTotal'),legend=document.getElementById('dashDonutLegend');
+  if(donutTotal)donutTotal.textContent=total.toLocaleString('pt-BR');
+  const denom=total||1;
+  const stop1=delivered/denom*100,stop2=stop1+transit/denom*100,stop3=stop2+occurrence/denom*100;
+  if(donut)donut.style.background=total?`conic-gradient(#39a948 0 ${stop1}%,#2469a4 ${stop1}% ${stop2}%,#e74747 ${stop2}% ${stop3}%,#3a4a41 ${stop3}%)`:'conic-gradient(#3a4a41 0 100%)';
+  if(legend)legend.innerHTML=`<div>🟩 Entregues<br><b>${delivered.toLocaleString('pt-BR')} (${(delivered/denom*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}%)</b></div><div>🟦 Em trânsito<br><b>${transit.toLocaleString('pt-BR')} (${(transit/denom*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}%)</b></div><div>🟥 Ocorrência<br><b>${occurrence.toLocaleString('pt-BR')} (${(occurrence/denom*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}%)</b></div><div>⬛ Sem rastreamento<br><b>${noTracking.toLocaleString('pt-BR')} (${(noTracking/denom*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}%)</b></div>`;
+  renderDashboardCarrierBars(rows);
+  renderDashboardBranchCost(rows);
+  renderDashboardAlerts(rows);
+}
+async function initializeDashboardPage(){
+  setTrackingQiveDefaultPeriod();
+  if(!qiveConfigured)await loadQiveStatus();
+  if(qiveConfigured&&!qiveTracking.documents.length)await loadQiveCtesForTracking({silent:true});
+  populateDashboardFilters();
+  renderDashboard();
+}
 const fileInput=document.getElementById('fileInput');document.getElementById('uploadInvoice').onclick=()=>fileInput.click();document.querySelector('#dropZone button').onclick=e=>{e.stopPropagation();fileInput.click()};document.getElementById('dropZone').onclick=()=>fileInput.click();fileInput.onchange=()=>showToast(fileInput.files.length+' arquivo(s) recebido(s) para leitura.');
 document.getElementById('syncInvoice').onclick=()=>showToast('Sincronização de API simulada.');
 document.getElementById('testConciliation').onclick=()=>openModal('Resultado da conciliação',`<div class="card"><div class="card-b"><p><b>Soma dos CT-es:</b> R$ 18.120,00</p><p><b>Valor do boleto:</b> R$ 18.320,00</p><p><b>Diferença:</b> <span style="color:var(--red)">R$ 200,00</span></p><p><span class="badge late">Divergência encontrada</span></p><p style="color:var(--muted)">A fatura foi bloqueada para revisão e um alerta foi gerado.</p></div></div>`);
 document.querySelectorAll('.invoiceBtn').forEach(b=>b.onclick=()=>document.getElementById('testConciliation').click());
-['filterBranch','filterCarrier'].forEach(id=>document.getElementById(id).onchange=()=>showToast('Dashboard filtrado (simulação).'));
+['filterBranch','filterCarrier','filterOperation'].forEach(id=>document.getElementById(id)?.addEventListener('change',renderDashboard));
 
 const themeLight=document.getElementById('themeLight');const themeDark=document.getElementById('themeDark');function applyTheme(theme){const light=theme==='light';document.body.classList.toggle('light-theme',light);themeLight?.classList.toggle('active',light);themeDark?.classList.toggle('active',!light);localStorage.setItem('carmak-theme',theme)}themeLight?.addEventListener('click',()=>applyTheme('light'));themeDark?.addEventListener('click',()=>applyTheme('dark'));applyTheme(localStorage.getItem('carmak-theme')||'dark');
 
