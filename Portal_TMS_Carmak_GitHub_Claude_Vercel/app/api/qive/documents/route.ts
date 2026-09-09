@@ -246,6 +246,46 @@ function ordersFromAdditionalInformation(text: string) {
   return orders;
 }
 
+function collectDocumentNotes(xml: string, structured: unknown): string[] {
+  return [
+    ...xmlValues(xml, "infCpl"),
+    ...xmlValues(xml, "infAdFisco"),
+    ...xmlValues(xml, "xTexto"),
+    ...xmlValues(xml, "xObs"),
+    ...collectStructuredValues(structured, [
+      "infCpl",
+      "infAdFisco",
+      "AdditionalInformation",
+      "AdditionalInfo",
+      "ComplementaryInformation",
+      "InformacoesComplementares",
+      "InformacoesAdicionais",
+      "Observacao",
+      "Observacoes",
+      "Observation",
+      "Observations",
+      "xTexto",
+      "xObs",
+    ]),
+  ];
+}
+
+// As observações não seguem um layout fixo — buscamos só frases explícitas de
+// entrega ("entregar em", "local de entrega", "endereço de entrega" etc.) para
+// não confundir um destino mencionado de passagem com o local real de entrega.
+const DELIVERY_NOTE_PATTERN =
+  /(?:local\s+de\s+entrega|endere[cç]o\s+de\s+entrega|entregar?\s+(?:no|na|em)|entrega\s+(?:no|na|em)|destino\s+final)\s*[:\-]?\s*([^\n\r]{6,140})/i;
+
+function deliveryLocationFromNotes(notes: string[]): string {
+  for (const note of notes) {
+    const match = note.match(DELIVERY_NOTE_PATTERN);
+    if (!match) continue;
+    const value = match[1].trim().replace(/\s{2,}/g, " ");
+    if (value) return value.slice(0, 140);
+  }
+  return "";
+}
+
 function extractNfePurchaseOrders(document: Record<string, unknown>) {
   const xml = decodeDocumentXml(document);
   const structured = document.Document || document.document;
@@ -285,27 +325,7 @@ function extractNfePurchaseOrders(document: Record<string, unknown>) {
     if (typeof value === "string" || typeof value === "number") add(String(value), "", "xPed");
   });
 
-  const notes = [
-    ...xmlValues(xml, "infCpl"),
-    ...xmlValues(xml, "infAdFisco"),
-    ...xmlValues(xml, "xTexto"),
-    ...xmlValues(xml, "xObs"),
-    ...collectStructuredValues(structured, [
-      "infCpl",
-      "infAdFisco",
-      "AdditionalInformation",
-      "AdditionalInfo",
-      "ComplementaryInformation",
-      "InformacoesComplementares",
-      "InformacoesAdicionais",
-      "Observacao",
-      "Observacoes",
-      "Observation",
-      "Observations",
-      "xTexto",
-      "xObs",
-    ]),
-  ];
+  const notes = collectDocumentNotes(xml, structured);
   notes.flatMap(ordersFromAdditionalInformation).forEach((order) => add(order, "", "observacoes"));
 
   const entries = Array.from(found.values());
@@ -355,6 +375,9 @@ function extractNfeOperationalData(document: Record<string, unknown>) {
       explicitAddress.city,
   );
   const hasStructuredDelivery = Boolean(structuredAddress.street || structuredAddress.city);
+  const deliveryNote = hasExplicitDelivery || hasStructuredDelivery
+    ? ""
+    : deliveryLocationFromNotes(collectDocumentNotes(xml, structured));
   const delivery = hasExplicitDelivery
     ? explicitAddress
     : hasStructuredDelivery
@@ -365,6 +388,7 @@ function extractNfeOperationalData(document: Record<string, unknown>) {
     sender,
     recipient,
     delivery,
+    deliveryNote,
     totalValue,
     deliveryParty: {
       name:
@@ -385,7 +409,9 @@ function extractNfeOperationalData(document: Record<string, unknown>) {
       ? "Local de entrega da NF-e · Qive"
       : hasStructuredDelivery
         ? "Endereço de entrega da NF-e · Qive"
-        : "Destinatário da NF-e · Qive",
+        : deliveryNote
+          ? "Observações da NF-e · Qive"
+          : "Destinatário da NF-e · Qive",
   };
 }
 
@@ -455,6 +481,11 @@ function extractCteOperationalData(document: Record<string, unknown>) {
           source: "",
         };
 
+  const hasDeliveryAddress = Boolean(deliveryParty.address.street || deliveryParty.address.city);
+  const deliveryNote = hasDeliveryAddress
+    ? ""
+    : deliveryLocationFromNotes(collectDocumentNotes(xml, structured));
+
   return {
     series: read("serie", ["Series"]),
     origin: {
@@ -471,8 +502,16 @@ function extractCteOperationalData(document: Record<string, unknown>) {
     receiver,
     freightPayer,
     delivery: deliveryParty.address,
-    deliverySource:
-      deliveryParty === receiver ? "Recebedor do CT-e" : "Destinatário do CT-e",
+    deliveryNote,
+    deliverySource: hasDeliveryAddress
+      ? deliveryParty === receiver
+        ? "Recebedor do CT-e"
+        : "Destinatário do CT-e"
+      : deliveryNote
+        ? "Observações do CT-e"
+        : deliveryParty === receiver
+          ? "Recebedor do CT-e"
+          : "Destinatário do CT-e",
     freightValue: read("vTPrest", ["TotalFreightValue"]),
     cargoValue: read("vCarga", ["CargoValue"]),
     extraFees,

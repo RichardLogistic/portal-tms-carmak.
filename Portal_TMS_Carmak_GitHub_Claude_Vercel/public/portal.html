@@ -1716,9 +1716,10 @@ function nfeDeliveryLocation(nfe){
   const address=addressLabel(delivery,'');
   const name=party.name||nfe.receiver?.name||'';
   const city=[delivery.city,delivery.uf].filter(Boolean).join('/');
-  const label=[name,address].filter(Boolean).join(' — ')||city;
+  const note=String(nfe.operational?.deliveryNote||'').trim();
+  const label=[name,address].filter(Boolean).join(' — ')||city||note;
   if(!label)return null;
-  return {label,source:nfe.operational?.deliverySource||'NF-e · Qive',detailed:Boolean(delivery.street||delivery.district||delivery.zipCode),city:city||'Destino a confirmar',name,address:delivery};
+  return {label,source:nfe.operational?.deliverySource||'NF-e · Qive',detailed:Boolean(delivery.street||delivery.district||delivery.zipCode),city:city||'Destino a confirmar',name,address:delivery,fromNote:Boolean(note&&!address&&!city)};
 }
 function deliveryLocation(doc){
   const locations=linkedNfeReferences(doc).map(item=>({...item.delivery,nfeNumber:item.number,accessKey:item.accessKey})).filter(item=>item.label);
@@ -1729,10 +1730,12 @@ function deliveryLocation(doc){
   const destination=doc.operational?.destination||{};
   const party=doc.operational?.receiver?.name?doc.operational.receiver:doc.operational?.recipient||doc.receiver||{};
   const city=[address.city||destination.city,address.uf||destination.uf].filter(Boolean).join('/');
-  const formattedAddress=addressLabel(address,city||'Local de entrega não detalhado no CT-e');
+  const hasAddress=Boolean(address.street||address.district||address.zipCode||address.city);
+  const note=String(doc.operational?.deliveryNote||'').trim();
+  const formattedAddress=hasAddress?addressLabel(address,city):note||addressLabel(address,city||'Local de entrega não detalhado no CT-e');
   const label=[party.name,formattedAddress].filter(Boolean).join(' — ');
   const source=doc.operational?.deliverySource||'Destino do CT-e';
-  return {label,source,detailed:Boolean(address.street||address.district||address.zipCode),city:city||'Destino a confirmar',multiple:false,locations:[]};
+  return {label,source,detailed:hasAddress,city:city||'Destino a confirmar',multiple:false,locations:[]};
 }
 function branchLabel(doc){
   return resolveBranch(doc,document.getElementById('trackingBranchFilter')?.value||'all').label;
