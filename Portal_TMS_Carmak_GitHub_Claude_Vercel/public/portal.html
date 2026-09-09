@@ -681,10 +681,6 @@ body.light-theme #reports .export-options{background:#fff}body.light-theme #repo
         <div class="field tracking-search-field"><label>Filtrar a lista</label><input id="trackingQiveSearch" placeholder="CT-e, NF-e, pedido, CNPJ, filial, endereço, remetente ou transportadora"></div>
       </div>
       <div class="tracking-status-line"><p id="trackingQiveMessage" aria-live="polite">Os CT-es do período serão carregados automaticamente.</p><div class="tracking-source-pills"><span class="payer-rule">✓ Todas as responsabilidades</span><span>HFS excluída</span><span>Qive · documentos fiscais</span><span id="trackingTwState">TW · verificando conector</span><span id="trackingSswState">SSW · Adonai, União, Estrela Vermelha e descoberta automática</span><span id="trackingSaoMiguelState">São Miguel · verificando conector</span><span id="trackingModularState">Modular · verificando conector</span></div></div>
-      <div class="tracking-carrier-panel" aria-label="Transportadoras reais identificadas nos CT-es">
-        <div class="tracking-carrier-head"><div><h4>Transportadoras encontradas nos CT-es</h4><p>O SSW só aparece como confirmado quando a NF-e retorna ocorrências reais.</p></div><span id="trackingCarrierCoverageSummary">Aguardando documentos da Qive</span></div>
-        <div class="tracking-carrier-grid" id="trackingCarrierGrid"><div class="tracking-carrier-empty">As transportadoras utilizadas pela Carmak aparecerão aqui automaticamente.</div></div>
-      </div>
       <div class="tracking-results-toolbar"><div><b>Documentos em acompanhamento</b><small id="trackingVisibleCount">Aguardando os CT-es do período</small></div><div class="tracking-display-options"><button class="btn btn-dark active" id="trackingCompactView" aria-pressed="true">Visão essencial</button><button class="btn btn-dark" id="trackingFullView" aria-pressed="false">Todas as colunas</button></div></div>
       <div class="table-wrap tracking-live-table hide" id="trackingQiveTableWrap"><table class="table" id="trackingLiveTable" data-view="compact"><thead><tr><th>CT-e</th><th>NF-e(s)</th><th>Pedido(s)</th><th>Emissão</th><th>Filial</th><th>Operação</th><th>Transportadora</th><th>Origem</th><th>Local de entrega</th><th>Peso</th><th>Valor CT-e</th><th>Carmak paga?</th><th>Status</th><th>Previsão / SLA</th><th>Última ocorrência</th><th>Ações</th></tr></thead><tbody id="trackingQiveTableBody"></tbody></table></div>
       <div class="tracking-table-footer hide" id="trackingTableFooter"><small id="trackingTableCount">Nenhum CT-e exibido</small><div class="tracking-pagination"><button class="btn btn-dark" id="trackingPagePrevious">‹ Anterior</button><span id="trackingPageLabel">Página 1</span><button class="btn btn-dark" id="trackingPageNext">Próxima ›</button></div></div>
@@ -1815,16 +1811,6 @@ function populateTrackingCarriers(documents){
   select.innerHTML='<option value="all">Todas as transportadoras</option>'+carriers.map(carrier=>`<option value="${esc(carrier.key)}">${esc(carrier.name)} · ${carrier.total}</option>`).join('');
   if(carriers.some(carrier=>carrier.key===current))select.value=current;
 }
-function renderTrackingCarrierCoverage(documents){
-  const grid=document.getElementById('trackingCarrierGrid'),summary=document.getElementById('trackingCarrierCoverageSummary');
-  if(!grid)return;
-  const carriers=carrierTrackingOverview(documents);
-  const selected=document.getElementById('trackingCarrierFilter')?.value||'all';
-  if(summary){const confirmed=carriers.filter(carrier=>carrier.sswTracked).length;summary.textContent=carriers.length?`${carriers.length} transportadora${carriers.length===1?'':'s'} · ${confirmed} com SSW confirmado`:'Nenhuma transportadora identificada no período'}
-  if(!carriers.length){grid.innerHTML='<div class="tracking-carrier-empty">As transportadoras utilizadas pela Carmak aparecerão aqui automaticamente.</div>';return}
-  grid.innerHTML=carriers.map(carrier=>`<button type="button" class="tracking-carrier-card${selected===carrier.key?' active':''}" data-carrier-key="${esc(carrier.key)}" aria-pressed="${selected===carrier.key}"><span class="tracking-carrier-card-head"><span class="tracking-carrier-card-name"><b title="${esc(carrier.legalName||carrier.name)}">${esc(carrier.name)}</b><small>${esc(carrier.cnpj?formatCnpj(carrier.cnpj):'CNPJ não informado')}</small></span><span class="tracking-carrier-tag ${carrier.state}">${esc(carrier.label)}</span></span><span class="tracking-carrier-card-metrics"><span><strong>${carrier.total.toLocaleString('pt-BR')}</strong> CT-e</span><span><strong>${carrier.nfeCount.toLocaleString('pt-BR')}</strong> NF-e</span><span><strong>${carrier.tracked.toLocaleString('pt-BR')}</strong> com evento</span></span></button>`).join('');
-  grid.querySelectorAll('[data-carrier-key]').forEach(button=>button.addEventListener('click',()=>{const select=document.getElementById('trackingCarrierFilter');if(!select)return;select.value=select.value===button.dataset.carrierKey?'all':button.dataset.carrierKey;resetTrackingPageAndRender()}));
-}
 function trackingCarrierDocumentCoverage(doc){
   if(carrierUsesConfirmedSsw(doc))return {state:'confirmed',label:'SSW confirmado'};
   if(carrierHasConfirmedTracking(doc))return {state:'confirmed',label:'Eventos confirmados'};
@@ -1896,7 +1882,6 @@ function renderQiveCtesForTracking(){
   const branch=document.getElementById('trackingBranchFilter')?.value||'all';
   const scoped=branch==='all'?qiveTracking.documents:qiveTracking.documents.filter(doc=>resolveBranch(doc,branch).selectedMatch);
   populateTrackingCarriers(scoped);
-  renderTrackingCarrierCoverage(scoped);
   updateQiveTrackingKpis(scoped);
   const filtered=trackingFilteredDocuments();
   qiveTracking.filtered=filtered;
@@ -2162,7 +2147,6 @@ async function updateCarrierTrackingAutomatically(){
       completed+=1;
       current.completed+=1;
       if(labels[connector.key])labels[connector.key].textContent=`${connector.label} · atualizando ${current.completed}/${totals[connector.key]}`;
-      if(completed%6===0){const branch=document.getElementById('trackingBranchFilter')?.value||'all';renderTrackingCarrierCoverage(branch==='all'?qiveTracking.documents:qiveTracking.documents.filter(item=>resolveBranch(item,branch).selectedMatch))}
     }
   };
   await Promise.all(Array.from({length:Math.min(4,candidates.length)},worker));

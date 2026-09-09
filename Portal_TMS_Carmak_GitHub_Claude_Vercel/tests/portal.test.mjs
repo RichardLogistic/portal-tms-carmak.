@@ -14,7 +14,6 @@ test("preserva filtros operacionais e painel real de transportadoras", async () 
     "trackingBranchFilter",
     "trackingCarrierFilter",
     "trackingCoverageFilter",
-    "trackingCarrierGrid",
     "trackingSswConfirmed",
     "trackingIdentifiedOrders",
   ]) {
