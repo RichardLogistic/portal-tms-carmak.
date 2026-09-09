@@ -1670,7 +1670,8 @@ function selectCarrierTrackingCandidates(documents,now=Date.now(),limit=TRACKING
       const checked=qiveTracking.carrierChecks?.get(doc.accessKey);
       return checked&&now-Number(checked.at||0)<TRACKING_REFRESH_MS&&!carrierHasConfirmedTracking(doc);
     }).length;
-    const discoveryLimit=profile.connector?.mode==='discovery'&&!profile.sswTracked?Math.max(0,TRACKING_DISCOVERY_SAMPLE_PER_CARRIER-recentFailures):Infinity;
+    const isRateLimitedProvider=profile.connector?.mode==='discovery'||profile.connector?.key==='saomiguel';
+    const discoveryLimit=isRateLimitedProvider&&!profile.sswTracked?Math.max(0,TRACKING_DISCOVERY_SAMPLE_PER_CARRIER-recentFailures):Infinity;
     const items=profile.documents.map(doc=>({doc,connector:carrierTrackingConnector(doc)})).filter(item=>{
       if(!item.connector||isBlockedFiscalDocument(item.doc)||!(item.doc.linkedNfeKeys||[]).length)return false;
       const checked=qiveTracking.carrierChecks?.get(item.doc.accessKey);
