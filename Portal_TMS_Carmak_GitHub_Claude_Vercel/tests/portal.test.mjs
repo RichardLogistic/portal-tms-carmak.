@@ -46,6 +46,7 @@ test("descobre transportadoras SSW e confirma somente ocorrências reais", async
       twConfigured: true,
       sswConfigured: true,
       saomiguelConfigured: true,
+      modularConfigured: true,
       sswDiscovery: true,
       sswCarriers: ["Adonai", "União", "Estrela Vermelha"],
       carrierEvents: new Map(),
@@ -116,6 +117,18 @@ test("descobre transportadoras SSW e confirma somente ocorrências reais", async
   const saoMiguelProfile = context.helpers.carrierTrackingOverview([saoMiguel])[0];
   assert.equal(saoMiguelProfile.sswTracked, 0);
   assert.equal(saoMiguelProfile.label, "Eventos confirmados");
+
+  const modular = {
+    accessKey: "5".repeat(44),
+    emitter: { name: "MODULAR TRANSPORTES LTDA", cnpj: "11222333000144" },
+    linkedNfeKeys: ["6".repeat(44)],
+    operational: {},
+  };
+
+  const modularConnector = context.helpers.carrierTrackingConnector(modular);
+  assert.equal(modularConnector.key, "modular");
+  assert.equal(modularConnector.endpoint, "/api/modular/rastreio");
+  assert.equal(context.helpers.carrierTrackingOverview([modular])[0].label, "Modular configurada");
 });
 
 test("preserva integrações fiscais e mantém rotas dinâmicas no servidor", async () => {
