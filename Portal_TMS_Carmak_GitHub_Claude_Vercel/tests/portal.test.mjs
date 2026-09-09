@@ -45,6 +45,7 @@ test("descobre transportadoras SSW e confirma somente ocorrências reais", async
       excludedCarrierCnpjs: [],
       twConfigured: true,
       sswConfigured: true,
+      saomiguelConfigured: true,
       sswDiscovery: true,
       sswCarriers: ["Adonai", "União", "Estrela Vermelha"],
       carrierEvents: new Map(),
@@ -93,6 +94,28 @@ test("descobre transportadoras SSW e confirma somente ocorrências reais", async
     }).kind,
     "general",
   );
+
+  const saoMiguel = {
+    accessKey: "3".repeat(44),
+    emitter: { name: "EXPRESSO SAO MIGUEL TRANSPORTES", cnpj: "94534237000104" },
+    linkedNfeKeys: ["4".repeat(44)],
+    operational: {},
+  };
+
+  const connector = context.helpers.carrierTrackingConnector(saoMiguel);
+  assert.equal(connector.key, "saomiguel");
+  assert.equal(connector.endpoint, "/api/saomiguel/rastreio");
+  assert.equal(connector.mode, "configured");
+  assert.equal(context.helpers.carrierTrackingOverview([saoMiguel])[0].label, "São Miguel configurada");
+
+  context.qiveTracking.carrierEvents.set(saoMiguel.accessKey, {
+    source: "SAOMIGUEL_API",
+    events: [{ ocorrencia: "Emissão do conhecimento de frete" }],
+  });
+
+  const saoMiguelProfile = context.helpers.carrierTrackingOverview([saoMiguel])[0];
+  assert.equal(saoMiguelProfile.sswTracked, 0);
+  assert.equal(saoMiguelProfile.label, "Eventos confirmados");
 });
 
 test("preserva integrações fiscais e mantém rotas dinâmicas no servidor", async () => {

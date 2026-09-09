@@ -684,7 +684,7 @@ body.light-theme #reports .export-options{background:#fff}body.light-theme #repo
         <div class="field"><label>Cobertura do rastreio</label><select id="trackingCoverageFilter"><option value="all">Todas as coberturas</option><option value="ssw">SSW confirmado</option><option value="events">Com eventos da transportadora</option><option value="pending">Sem eventos confirmados</option></select></div>
         <div class="field tracking-search-field"><label>Filtrar a lista</label><input id="trackingQiveSearch" placeholder="CT-e, NF-e, pedido, CNPJ, filial, endereço, remetente ou transportadora"></div>
       </div>
-      <div class="tracking-status-line"><p id="trackingQiveMessage" aria-live="polite">Os CT-es do período serão carregados automaticamente.</p><div class="tracking-source-pills"><span class="payer-rule">✓ Todas as responsabilidades</span><span>HFS excluída</span><span>Qive · documentos fiscais</span><span id="trackingTwState">TW · verificando conector</span><span id="trackingSswState">SSW · Adonai, União, Estrela Vermelha e descoberta automática</span></div></div>
+      <div class="tracking-status-line"><p id="trackingQiveMessage" aria-live="polite">Os CT-es do período serão carregados automaticamente.</p><div class="tracking-source-pills"><span class="payer-rule">✓ Todas as responsabilidades</span><span>HFS excluída</span><span>Qive · documentos fiscais</span><span id="trackingTwState">TW · verificando conector</span><span id="trackingSswState">SSW · Adonai, União, Estrela Vermelha e descoberta automática</span><span id="trackingSaoMiguelState">São Miguel · verificando conector</span></div></div>
       <div class="tracking-carrier-panel" aria-label="Transportadoras reais identificadas nos CT-es">
         <div class="tracking-carrier-head"><div><h4>Transportadoras encontradas nos CT-es</h4><p>O SSW só aparece como confirmado quando a NF-e retorna ocorrências reais.</p></div><span id="trackingCarrierCoverageSummary">Aguardando documentos da Qive</span></div>
         <div class="tracking-carrier-grid" id="trackingCarrierGrid"><div class="tracking-carrier-empty">As transportadoras utilizadas pela Carmak aparecerão aqui automaticamente.</div></div>
@@ -1450,7 +1450,7 @@ const TRACKING_REFRESH_MS=15*60*1000;
 const TRACKING_MAX_QIVE_PAGES=200;
 const TRACKING_MAX_CARRIER_CHECKS=90;
 const TRACKING_DISCOVERY_SAMPLE_PER_CARRIER=3;
-const qiveTracking={documents:[],allDocuments:[],filtered:[],month:'',from:'',to:'',periodKey:'',page:1,pageSize:50,loading:false,carrierLoading:false,orderLoading:false,orderPeriod:'',twConfigured:false,twProvider:'',sswConfigured:false,sswDiscovery:true,sswCarriers:['Adonai','União','Estrela Vermelha'],carrierEvents:new Map(),carrierErrors:new Map(),carrierChecks:new Map(),trackingLookupCache:new Map(),nfeByKey:new Map(),nextSyncAt:0,excludedHfs:0,excludedUnrelated:0,excludedCarrierCnpjs:[],incomplete:false};
+const qiveTracking={documents:[],allDocuments:[],filtered:[],month:'',from:'',to:'',periodKey:'',page:1,pageSize:50,loading:false,carrierLoading:false,orderLoading:false,orderPeriod:'',twConfigured:false,twProvider:'',sswConfigured:false,saomiguelConfigured:false,sswDiscovery:true,sswCarriers:['Adonai','União','Estrela Vermelha'],carrierEvents:new Map(),carrierErrors:new Map(),carrierChecks:new Map(),trackingLookupCache:new Map(),nfeByKey:new Map(),nextSyncAt:0,excludedHfs:0,excludedUnrelated:0,excludedCarrierCnpjs:[],incomplete:false};
 function digits(value){return String(value||'').replace(/\D/g,'')}
 function normalizeTrackingText(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase()}
 function formatCnpj(value){
@@ -1612,6 +1612,8 @@ function carrierTrackingConnector(doc){
   const names=[doc.emitter?.name,doc.emitter?.tradeName].map(normalizeTrackingText).filter(Boolean);
   const isTw=names.some(name=>/(^|[^a-z0-9])tw([^a-z0-9]|$)/.test(name));
   if(isTw&&qiveTracking.twConfigured)return {key:'tw',endpoint:'/api/tw/rastreio',label:'TW',mode:'configured'};
+  const isSaoMiguel=names.some(name=>name.includes('sao miguel'));
+  if(isSaoMiguel&&qiveTracking.saomiguelConfigured)return {key:'saomiguel',endpoint:'/api/saomiguel/rastreio',label:'São Miguel',mode:'configured'};
   if(!qiveTracking.sswConfigured)return null;
   const configured=qiveTracking.sswCarriers.some(carrier=>names.some(name=>name.includes(normalizeTrackingText(carrier))));
   if(configured)return {key:'ssw',endpoint:'/api/ssw/rastreio',label:'SSW',mode:'configured'};
@@ -1652,8 +1654,8 @@ function carrierTrackingOverview(documents){
     if(carrier.sswTracked){state='confirmed';label=carrier.connector?.key==='tw'?'TW · SSW confirmado':'SSW confirmado'}
     else if(carrier.tracked){state='confirmed';label='Eventos confirmados'}
     else if(!carrier.nfeKeys.size){state='missing';label='Sem NF-e vinculada'}
-    else if(carrier.failures){state='unconfirmed';label=carrier.connector?.key==='tw'?'TW sem retorno':'SSW não confirmado'}
-    else if(carrier.connector?.mode==='configured'){state='configured';label=carrier.connector.key==='tw'?'TW configurada':'SSW configurado'}
+    else if(carrier.failures){state='unconfirmed';label=carrier.connector?.key==='tw'?'TW sem retorno':carrier.connector?.key==='saomiguel'?'São Miguel sem retorno':'SSW não confirmado'}
+    else if(carrier.connector?.mode==='configured'){state='configured';label=carrier.connector.key==='tw'?'TW configurada':carrier.connector.key==='saomiguel'?'São Miguel configurada':'SSW configurado'}
     else if(carrier.connector){state='probing';label=qiveTracking.carrierLoading?'Verificando SSW':'SSW em verificação'}
     else{state='missing';label='Integração pendente'}
     return {...carrier,state,label,nfeCount:carrier.nfeKeys.size,total:carrier.documents.length};
@@ -1829,13 +1831,14 @@ function trackingCarrierDocumentCoverage(doc){
   if(carrierHasConfirmedTracking(doc))return {state:'confirmed',label:'Eventos confirmados'};
   if(!(doc.linkedNfeKeys||[]).length)return {state:'missing',label:'Sem NF-e vinculada'};
   const connector=carrierTrackingConnector(doc);
-  if(qiveTracking.carrierErrors?.has(doc.accessKey))return {state:'unconfirmed',label:connector?.key==='tw'?'TW sem retorno':'SSW não confirmado'};
-  if(connector?.mode==='configured')return {state:'configured',label:connector.key==='tw'?'TW configurada':'SSW configurado'};
-  if(connector)return {state:'probing',label:'Verificando SSW'};
+  if(qiveTracking.carrierErrors?.has(doc.accessKey))return {state:'unconfirmed',label:connector?.key==='tw'?'TW sem retorno':connector?.key==='saomiguel'?'São Miguel sem retorno':'SSW não confirmado'};
+  if(connector?.mode==='configured')return {state:'configured',label:connector.key==='tw'?'TW configurada':connector.key==='saomiguel'?'São Miguel configurada':'SSW configurado'};
+  if(connector)return {state:'probing',label:connector.key==='saomiguel'?'Verificando São Miguel':'Verificando SSW'};
   return {state:'missing',label:'Integração pendente'};
 }
 function trackingSourceLabel(doc){
   const source=String(carrierRecord(doc)?.source||'').toUpperCase();
+  if(source.includes('SAOMIGUEL'))return 'São Miguel';
   if(source.includes('SSW'))return 'SSW';
   if(source.includes('EDI'))return 'EDI';
   if(source.includes('MANUAL'))return 'Manual';
@@ -2086,7 +2089,20 @@ async function loadSswTrackingStatus(){
   }
   return qiveTracking.sswConfigured;
 }
-async function loadCarrierTrackingStatuses(){return Promise.all([loadTwTrackingStatus(),loadSswTrackingStatus()])}
+async function loadSaoMiguelTrackingStatus(){
+  const label=document.getElementById('trackingSaoMiguelState');
+  try{
+    const response=await fetch('/api/saomiguel/rastreio',{cache:'no-store'});
+    const payload=await response.json();
+    qiveTracking.saomiguelConfigured=response.ok&&Boolean(payload.configured);
+    if(label)label.textContent=qiveTracking.saomiguelConfigured?'São Miguel · conectado':'São Miguel · configuração pendente';
+  }catch{
+    qiveTracking.saomiguelConfigured=false;
+    if(label)label.textContent='São Miguel · conector indisponível';
+  }
+  return qiveTracking.saomiguelConfigured;
+}
+async function loadCarrierTrackingStatuses(){return Promise.all([loadTwTrackingStatus(),loadSswTrackingStatus(),loadSaoMiguelTrackingStatus()])}
 async function fetchCarrierTrackingPayload(connector,nfeKey){
   const cacheKey=`${connector.endpoint}:${nfeKey}`;
   const existing=qiveTracking.trackingLookupCache.get(cacheKey);
@@ -2096,15 +2112,16 @@ async function fetchCarrierTrackingPayload(connector,nfeKey){
   try{return await promise}catch(error){qiveTracking.trackingLookupCache.delete(cacheKey);throw error}
 }
 async function updateCarrierTrackingAutomatically(){
-  if(qiveTracking.carrierLoading||(!qiveTracking.twConfigured&&!qiveTracking.sswConfigured))return;
+  if(qiveTracking.carrierLoading||(!qiveTracking.twConfigured&&!qiveTracking.sswConfigured&&!qiveTracking.saomiguelConfigured))return;
   const candidates=selectCarrierTrackingCandidates(qiveTracking.documents);
   if(!candidates.length){renderQiveCtesForTracking();return}
   qiveTracking.carrierLoading=true;
   renderQiveCtesForTracking();
-  const labels={tw:document.getElementById('trackingTwState'),ssw:document.getElementById('trackingSswState')};
-  const totals={tw:candidates.filter(item=>item.connector.key==='tw').length,ssw:candidates.filter(item=>item.connector.key==='ssw').length};
-  const progress={tw:{completed:0,updated:0,failed:0},ssw:{completed:0,updated:0,failed:0}};
-  Object.keys(labels).forEach(key=>{if(labels[key]&&totals[key])labels[key].textContent=`${key.toUpperCase()} · atualizando 0/${totals[key]}`});
+  const carrierLabels={tw:'TW',ssw:'SSW',saomiguel:'São Miguel'};
+  const labels={tw:document.getElementById('trackingTwState'),ssw:document.getElementById('trackingSswState'),saomiguel:document.getElementById('trackingSaoMiguelState')};
+  const totals={tw:candidates.filter(item=>item.connector.key==='tw').length,ssw:candidates.filter(item=>item.connector.key==='ssw').length,saomiguel:candidates.filter(item=>item.connector.key==='saomiguel').length};
+  const progress={tw:{completed:0,updated:0,failed:0},ssw:{completed:0,updated:0,failed:0},saomiguel:{completed:0,updated:0,failed:0}};
+  Object.keys(labels).forEach(key=>{if(labels[key]&&totals[key])labels[key].textContent=`${carrierLabels[key]} · atualizando 0/${totals[key]}`});
   let cursor=0,completed=0;
   const worker=async()=>{
     while(cursor<candidates.length){
@@ -2118,7 +2135,7 @@ async function updateCarrierTrackingAutomatically(){
             const header=payload.documento?.header||{};
             if(!trackingCarrierMatchesResponse(doc,header)){lastMessage='A NF-e retornou eventos de outra transportadora; vínculo não confirmado.';continue}
             const tracking=Array.isArray(payload.documento?.tracking)?payload.documento.tracking:[];
-            qiveTracking.carrierEvents.set(doc.accessKey,{header,events:tracking,source:payload.source||(connector.key==='ssw'?'SSW_API':'TW_SSW_API'),nfeKey});
+            qiveTracking.carrierEvents.set(doc.accessKey,{header,events:tracking,source:payload.source||(connector.key==='ssw'?'SSW_API':connector.key==='saomiguel'?'SAOMIGUEL_API':'TW_SSW_API'),nfeKey});
             if(!tracking.length){lastMessage='A NF-e foi localizada, mas a transportadora ainda não publicou ocorrências.';continue}
             qiveTracking.carrierErrors.delete(doc.accessKey);
             current.updated+=1;
@@ -2138,7 +2155,7 @@ async function updateCarrierTrackingAutomatically(){
   };
   await Promise.all(Array.from({length:Math.min(4,candidates.length)},worker));
   qiveTracking.carrierLoading=false;
-  Object.keys(labels).forEach(key=>{if(!labels[key]||!totals[key])return;const result=progress[key];if(key==='ssw'){const confirmed=carrierTrackingOverview(qiveTracking.documents).filter(carrier=>carrier.sswTracked).length;labels[key].textContent=`SSW · ${confirmed} transportadora${confirmed===1?'':'s'} confirmada${confirmed===1?'':'s'} · ${result.updated} CT-e${result.updated===1?'':'s'} atualizado${result.updated===1?'':'s'}`}else labels[key].textContent=result.failed?`${key.toUpperCase()} · ${result.updated} atualizado${result.updated===1?'':'s'} · ${result.failed} sem retorno`:`${key.toUpperCase()} · ${result.updated} atualizado${result.updated===1?'':'s'}`});
+  Object.keys(labels).forEach(key=>{if(!labels[key]||!totals[key])return;const result=progress[key];if(key==='ssw'){const confirmed=carrierTrackingOverview(qiveTracking.documents).filter(carrier=>carrier.sswTracked).length;labels[key].textContent=`SSW · ${confirmed} transportadora${confirmed===1?'':'s'} confirmada${confirmed===1?'':'s'} · ${result.updated} CT-e${result.updated===1?'':'s'} atualizado${result.updated===1?'':'s'}`}else labels[key].textContent=result.failed?`${carrierLabels[key]} · ${result.updated} atualizado${result.updated===1?'':'s'} · ${result.failed} sem retorno`:`${carrierLabels[key]} · ${result.updated} atualizado${result.updated===1?'':'s'}`});
   updateQiveTrackingKpis(qiveTracking.documents);
   renderQiveCtesForTracking();
   if(document.getElementById('reports')?.classList.contains('active'))renderReports();
