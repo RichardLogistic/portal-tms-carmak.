@@ -130,6 +130,29 @@ test("descobre transportadoras SSW e confirma somente ocorrências reais", async
   assert.equal(context.helpers.carrierTrackingOverview([modular])[0].label, "Modular configurada");
 });
 
+test("todo campo disponível nos Relatórios corresponde a uma coluna real", async () => {
+  const portal = await readFile(portalUrl, "utf8");
+  const fieldLabels = Array.from(
+    portal.matchAll(/<div class="field-row" data-field="([^"]+)">/g),
+  ).map((match) => match[1]);
+  assert.ok(fieldLabels.length >= 20, "esperava encontrar a lista de campos disponíveis");
+
+  const start = portal.indexOf("const reportColumns=");
+  const end = portal.indexOf("function qiveReportData");
+  assert.ok(start > 0 && end > start);
+
+  const context = {};
+  runInNewContext(`${portal.slice(start, end)}\nglobalThis.helpers = { reportFieldKey };`, context);
+
+  for (const label of fieldLabels) {
+    assert.notEqual(
+      context.helpers.reportFieldKey(label),
+      "",
+      `o campo "${label}" não corresponde a nenhuma coluna em reportColumns/reportFieldAliases`,
+    );
+  }
+});
+
 test("preserva integrações fiscais e mantém rotas dinâmicas no servidor", async () => {
   for (const route of [
     "../app/api/qive/documents/route.ts",
