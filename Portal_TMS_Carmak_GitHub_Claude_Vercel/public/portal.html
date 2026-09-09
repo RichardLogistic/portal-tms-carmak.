@@ -602,7 +602,7 @@ body.light-theme #reports .export-options{background:#fff}body.light-theme #repo
       <button class="btn btn-outline" id="advancedBtn">☷ Filtros avançados</button>
       <button class="btn btn-primary" id="widgetBtn">＋ Adicionar widget</button>
     </div>
-    <div class="card widget-panel" id="widgetPanel"><div class="card-h"><h3>Personalizar dashboard</h3></div><div class="card-b chips"><span class="chip" data-widget="kpi-on-time">Entregas no prazo</span><span class="chip" data-widget="kpi-late">Entregas atrasadas</span><span class="chip" data-widget="kpi-transit">Em trânsito</span><span class="chip" data-widget="kpi-pending">Sem rastreamento</span><span class="chip" data-widget="kpi-cost">Custo total</span><span class="chip" data-widget="kpi-otd">OTD</span></div></div>
+    <div class="card widget-panel" id="widgetPanel"><div class="card-h"><h3>Personalizar dashboard</h3></div><div class="card-b chips"><span class="chip" data-widget="kpi-on-time">Entregas no prazo</span><span class="chip" data-widget="kpi-late">Entregas atrasadas</span><span class="chip" data-widget="kpi-transit">Em trânsito</span><span class="chip" data-widget="kpi-pending">Sem rastreamento</span><span class="chip" data-widget="kpi-cost">Custo total</span><span class="chip" data-widget="kpi-otd">OTD</span><span class="chip" data-widget="kpi-fees">Taxas extras</span><span class="chip" data-widget="kpi-freight-ratio">Frete/Mercadoria</span></div></div>
     <div class="kpis">
       <div class="kpi" id="kpi-on-time"><div class="kpi-top"><div><small>Entregas no prazo</small><strong id="dashKpiOnTime">0</strong><span id="dashKpiOnTimeSub" style="color:var(--green)">—</span></div><span class="ico green">▣</span></div></div>
       <div class="kpi" id="kpi-late"><div class="kpi-top"><div><small>Entregas atrasadas</small><strong id="dashKpiLate">0</strong><span id="dashKpiLateSub">—</span></div><span class="ico red">△</span></div></div>
@@ -610,6 +610,8 @@ body.light-theme #reports .export-options{background:#fff}body.light-theme #repo
       <div class="kpi" id="kpi-pending"><div class="kpi-top"><div><small>Sem rastreamento</small><strong id="dashKpiPending">0</strong><span id="dashKpiPendingSub">—</span></div><span class="ico orange">▤</span></div></div>
       <div class="kpi" id="kpi-cost"><div class="kpi-top"><div><small>Custo total frete (Carmak paga)</small><strong id="dashKpiCost">R$ 0</strong><span id="dashKpiCostSub" style="color:var(--muted)">—</span></div><span class="ico green">$</span></div></div>
       <div class="kpi" id="kpi-otd"><div class="kpi-top"><div><small>OTD (no prazo)</small><strong id="dashKpiOtd">—</strong><span id="dashKpiOtdSub" style="color:var(--muted)">—</span></div><span class="ico green">◎</span></div></div>
+      <div class="kpi" id="kpi-fees"><div class="kpi-top"><div><small>Taxas extras (TDE, TDA, etc.)</small><strong id="dashKpiFees">R$ 0</strong><span id="dashKpiFeesSub" style="color:var(--muted)">—</span></div><span class="ico orange">%</span></div></div>
+      <div class="kpi" id="kpi-freight-ratio"><div class="kpi-top"><div><small>Frete sobre valor da mercadoria</small><strong id="dashKpiFreightRatio">—</strong><span id="dashKpiFreightRatioSub" style="color:var(--muted)">—</span></div><span class="ico blue">÷</span></div></div>
     </div>
     <div class="grid">
       <div class="card"><div class="card-h"><h3>Entregas por status</h3></div><div class="card-b donut-wrap"><div class="donut" id="dashDonut"><div class="donut-center"><div><b id="dashDonutTotal" style="font-size:22px">0</b><br><small>Total</small></div></div></div><div class="legend" id="dashDonutLegend"></div></div></div>
@@ -643,7 +645,6 @@ body.light-theme #reports .export-options{background:#fff}body.light-theme #repo
             <div class="tracking-kpi-auto tracking-kpi-secondary bad"><small>Bloqueados fiscalmente</small><strong id="trackingQiveFiscalBlocked">0</strong><em>Cancelados, substituídos ou anulados</em></div>
             <div class="tracking-kpi-auto neutral"><small>NF-es vinculadas</small><strong id="trackingQiveLinkedNfes">0</strong><em>Chaves únicas localizadas nos CT-es</em></div>
             <div class="tracking-kpi-auto"><small>Pedidos identificados</small><strong id="trackingIdentifiedOrders">0</strong><em>Campo do pedido ou observações da nota</em></div>
-            <div class="tracking-kpi-auto info"><small>Transportadoras encontradas</small><strong id="trackingCarriersFound">0</strong><em>Identificadas nos CT-es da Qive</em></div>
             <div class="tracking-kpi-auto"><small>SSW confirmado</small><strong id="trackingSswConfirmed">0</strong><em>Transportadoras com eventos reais</em></div>
             <div class="tracking-kpi-auto tracking-kpi-secondary neutral"><small>HFS excluídos</small><strong id="trackingExcludedHfs">0</strong><em>Exclusão somente no rastreamento</em></div>
           </div>
@@ -1964,7 +1965,6 @@ function updateQiveTrackingKpis(documents){
   set('trackingQiveFiscalBlocked',documents.filter(isBlockedFiscalDocument).length);
   set('trackingQiveLinkedNfes',linkedNfes.size);
   set('trackingIdentifiedOrders',orders.size);
-  set('trackingCarriersFound',carriers.length);
   set('trackingSswConfirmed',carriers.filter(carrier=>carrier.sswTracked).length);
   set('trackingQiveInTransit',statuses.filter(status=>status.kind==='transit').length);
   set('trackingQiveDelivered',statuses.filter(status=>status.kind==='delivered').length);
@@ -2513,7 +2513,8 @@ function qiveReportData(){
     const operational=status.kind==='delivered'?'Entregue':status.kind==='transit'?'Em trânsito':status.kind==='pending'?status.label:status.label;
     const delivered=status.kind==='delivered'?reportIsoDate(latest.date):'';
     const slaLabel=reportSlaLabel(status,forecast,delivered);
-    return {source:'cte',carrier:doc.emitter?.name||'Não informada',destination:route.to,deliveryLocation:route.delivery.label,paidByCarmak:payer.paidByCarmak,paidByCarmakLabel:payer.paidByCarmak?'SIM':'NÃO',payer:payer.name,branchCnpj:resolved.cnpj,relatedBranchCnpjs:resolved.relatedCnpjs,order:trackingPurchaseOrders(doc).map(order=>order.number).join(', '),nfe:nfes.map(item=>item.number).filter(Boolean).join(', ')||'—',cte:String(doc.number||''),series:String(doc.operational?.series||''),accessKey:String(doc.accessKey||''),emission:reportIsoDate(doc.emissionDate),forecast:reportIsoDate(forecast),delivered,operational,sla:slaLabel,freight:doc.operational?.freightValue||'',weight:doc.operational?.weight||'',cubedWeight:doc.operational?.cubedWeight||'',goodsValue:doc.operational?.cargoValue||'',volumes:doc.operational?.volumes||'',leadTime:delivered?reportLeadTime(doc.emissionDate,delivered):'',branch:resolved.label,branchOrigin:doc.operational?.sender?.name||route.from,originCity:route.from,operation:operation.label,cargoType:cargo.label,cargoProduct:cargo.product,costCenter:'',priority:''};
+    const nfeValue=nfes.reduce((sum,item)=>sum+trackingNumber(item.document?.operational?.totalValue),0);
+    return {source:'cte',carrier:doc.emitter?.name||'Não informada',destination:route.to,deliveryLocation:route.delivery.label,paidByCarmak:payer.paidByCarmak,paidByCarmakLabel:payer.paidByCarmak?'SIM':'NÃO',payer:payer.name,branchCnpj:resolved.cnpj,relatedBranchCnpjs:resolved.relatedCnpjs,order:trackingPurchaseOrders(doc).map(order=>order.number).join(', '),nfe:nfes.map(item=>item.number).filter(Boolean).join(', ')||'—',cte:String(doc.number||''),series:String(doc.operational?.series||''),accessKey:String(doc.accessKey||''),emission:reportIsoDate(doc.emissionDate),forecast:reportIsoDate(forecast),delivered,operational,sla:slaLabel,freight:doc.operational?.freightValue||'',extraFees:doc.operational?.extraFees||0,nfeValue,weight:doc.operational?.weight||'',cubedWeight:doc.operational?.cubedWeight||'',goodsValue:doc.operational?.cargoValue||'',volumes:doc.operational?.volumes||'',leadTime:delivered?reportLeadTime(doc.emissionDate,delivered):'',branch:resolved.label,branchOrigin:doc.operational?.sender?.name||route.from,originCity:route.from,operation:operation.label,cargoType:cargo.label,cargoProduct:cargo.product,costCenter:'',priority:''};
   });
 }
 function reportBaseData(){
@@ -2702,7 +2703,11 @@ function renderDashboard(){
   const slaRows=rows.filter(row=>row.sla!=='Sem previsão');
   const onTime=rows.filter(row=>row.sla==='No prazo').length;
   const late=rows.filter(row=>row.sla==='Atrasada').length;
-  const freight=rows.filter(row=>row.paidByCarmak===true).reduce((sum,row)=>sum+reportNumber(row.freight),0);
+  const paidRows=rows.filter(row=>row.paidByCarmak===true);
+  const freight=paidRows.reduce((sum,row)=>sum+reportNumber(row.freight),0);
+  const extraFeesSum=paidRows.reduce((sum,row)=>sum+reportNumber(row.extraFees),0);
+  const nfeValueSum=paidRows.reduce((sum,row)=>sum+reportNumber(row.nfeValue),0);
+  const freightRatio=nfeValueSum?freight/nfeValueSum*100:null;
   const otd=slaRows.length?onTime/slaRows.length*100:null;
   const pct=count=>total?`${(count/total*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}% do total`:'Sem CT-es no período';
   const setText=(id,value)=>{const element=document.getElementById(id);if(element)element.textContent=value};
@@ -2712,6 +2717,8 @@ function renderDashboard(){
   setText('dashKpiPending',noTracking.toLocaleString('pt-BR'));setText('dashKpiPendingSub',pct(noTracking));
   setText('dashKpiCost','R$ '+reportMoney(freight));setText('dashKpiCostSub',total?`${total.toLocaleString('pt-BR')} CT-e${total===1?'':'s'} no período`:'Sem CT-es no período');
   setText('dashKpiOtd',otd==null?'—':otd.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%');setText('dashKpiOtdSub',slaRows.length?`${slaRows.length.toLocaleString('pt-BR')} CT-es com previsão`:'Nenhum CT-e com previsão');
+  setText('dashKpiFees','R$ '+reportMoney(extraFeesSum));setText('dashKpiFeesSub',paidRows.length?`${paidRows.length.toLocaleString('pt-BR')} CT-e${paidRows.length===1?'':'s'} pagos pela Carmak`:'Sem CT-es pagos pela Carmak');
+  setText('dashKpiFreightRatio',freightRatio==null?'—':freightRatio.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%');setText('dashKpiFreightRatioSub',nfeValueSum?`R$ ${reportMoney(freight)} frete / R$ ${reportMoney(nfeValueSum)} em mercadoria`:'Sem valor de NF-e vinculado');
   const donut=document.getElementById('dashDonut'),donutTotal=document.getElementById('dashDonutTotal'),legend=document.getElementById('dashDonutLegend');
   if(donutTotal)donutTotal.textContent=total.toLocaleString('pt-BR');
   const denom=total||1;

@@ -324,6 +324,9 @@ function extractNfePurchaseOrders(document: Record<string, unknown>) {
 function extractNfeOperationalData(document: Record<string, unknown>) {
   const xml = decodeDocumentXml(document);
   const structured = document.Document || document.document;
+  const read = (tag: string, aliases: string[] = []) =>
+    xmlValue(xml, tag) || findStructuredValue(structured, [tag, ...aliases]);
+  const totalValue = normalizeQuantity(read("vNF", ["TotalValue", "vNFe"]));
   const sender = extractXmlParty(xml, "emit", ["enderEmit"]);
   const recipient = extractXmlParty(xml, "dest", ["enderDest"]);
   const explicitDelivery = extractXmlParty(xml, "entrega", []);
@@ -362,6 +365,7 @@ function extractNfeOperationalData(document: Record<string, unknown>) {
     sender,
     recipient,
     delivery,
+    totalValue,
     deliveryParty: {
       name:
         explicitDelivery.name ||
@@ -385,10 +389,26 @@ function extractNfeOperationalData(document: Record<string, unknown>) {
   };
 }
 
+function extractCteFeeComponents(xml: string) {
+  return xmlBlocks(xml, "Comp")
+    .map((block) => ({
+      name: xmlValue(block, "xNome"),
+      value: normalizeQuantity(xmlValue(block, "vComp")),
+    }))
+    .filter((component) => component.name);
+}
+
 function extractCteOperationalData(document: Record<string, unknown>) {
   const xml = decodeDocumentXml(document);
   const structured = document.Document || document.document;
   const quantities = extractCteQuantities(xml, structured);
+  const feeComponents = extractCteFeeComponents(xml);
+  // vTPrest já inclui essas taxas (pedágio, TDE, TDA, GRIS etc.) — este total é
+  // só a parte "extra" para exibir separada do frete-peso base, não um valor
+  // adicional ao freightValue.
+  const extraFees = feeComponents
+    .filter((component) => !/frete/i.test(component.name))
+    .reduce((sum, component) => sum + component.value, 0);
   const read = (tag: string, aliases: string[] = []) =>
     xmlValue(xml, tag) || findStructuredValue(structured, [tag, ...aliases]);
   const sender = extractXmlParty(xml, "rem", ["enderReme"]);
@@ -455,6 +475,8 @@ function extractCteOperationalData(document: Record<string, unknown>) {
       deliveryParty === receiver ? "Recebedor do CT-e" : "Destinatário do CT-e",
     freightValue: read("vTPrest", ["TotalFreightValue"]),
     cargoValue: read("vCarga", ["CargoValue"]),
+    extraFees,
+    feeComponents,
     weight: quantities.weight,
     cubedWeight: quantities.cubedWeight,
     volumes: quantities.volumes,
