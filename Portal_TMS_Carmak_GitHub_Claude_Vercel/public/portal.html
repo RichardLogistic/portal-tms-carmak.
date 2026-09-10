@@ -602,7 +602,7 @@ body.light-theme #reports .export-options{background:#fff}body.light-theme #repo
       <button class="btn btn-outline" id="advancedBtn">☷ Filtros avançados</button>
       <button class="btn btn-primary" id="widgetBtn">＋ Adicionar widget</button>
     </div>
-    <div class="card widget-panel" id="widgetPanel"><div class="card-h"><h3>Personalizar dashboard</h3></div><div class="card-b chips"><span class="chip" data-widget="kpi-on-time">Entregas no prazo</span><span class="chip" data-widget="kpi-late">Entregas atrasadas</span><span class="chip" data-widget="kpi-transit">Em trânsito</span><span class="chip" data-widget="kpi-pending">Sem rastreamento</span><span class="chip" data-widget="kpi-cost">Custo total</span><span class="chip" data-widget="kpi-otd">OTD</span><span class="chip" data-widget="kpi-fees">Taxas extras</span><span class="chip" data-widget="kpi-freight-ratio">Frete/Mercadoria</span></div></div>
+    <div class="card widget-panel" id="widgetPanel"><div class="card-h"><h3>Personalizar dashboard</h3></div><div class="card-b chips"><span class="chip" data-widget="kpi-on-time">Entregas no prazo</span><span class="chip" data-widget="kpi-late">Entregas atrasadas</span><span class="chip" data-widget="kpi-transit">Em trânsito</span><span class="chip" data-widget="kpi-pending">Sem rastreamento</span><span class="chip" data-widget="kpi-cost">Custo total</span><span class="chip" data-widget="kpi-otd">OTD</span><span class="chip" data-widget="kpi-fees">Taxas extras</span><span class="chip" data-widget="kpi-freight-ratio">Frete/Mercadoria</span><span class="chip" data-widget="kpi-purchases">Compras (inbound)</span><span class="chip" data-widget="kpi-shipments">Envios (outbound)</span><span class="chip" data-widget="kpi-cost-inbound">Custo inbound</span><span class="chip" data-widget="kpi-cost-outbound">Custo outbound</span><span class="chip" data-widget="kpi-fees-other">Despesas extras (TDE/TDA/TRT/zona rural)</span><span class="chip" data-widget="kpi-avg-ticket">Ticket médio por envio</span><span class="chip" data-widget="kpi-delivery-freq">Frequência de entregas</span><span class="chip" data-widget="card-freight-ratio-breakdown">Frete/Mercadoria por filial e transportadora</span></div></div>
     <div class="kpis">
       <div class="kpi" id="kpi-on-time"><div class="kpi-top"><div><small>Entregas no prazo</small><strong id="dashKpiOnTime">0</strong><span id="dashKpiOnTimeSub" style="color:var(--green)">—</span></div><span class="ico green">▣</span></div></div>
       <div class="kpi" id="kpi-late"><div class="kpi-top"><div><small>Entregas atrasadas</small><strong id="dashKpiLate">0</strong><span id="dashKpiLateSub">—</span></div><span class="ico red">△</span></div></div>
@@ -612,12 +612,20 @@ body.light-theme #reports .export-options{background:#fff}body.light-theme #repo
       <div class="kpi" id="kpi-otd"><div class="kpi-top"><div><small>OTD (no prazo)</small><strong id="dashKpiOtd">—</strong><span id="dashKpiOtdSub" style="color:var(--muted)">—</span></div><span class="ico green">◎</span></div></div>
       <div class="kpi" id="kpi-fees"><div class="kpi-top"><div><small>Taxas extras (TDE, TDA, etc.)</small><strong id="dashKpiFees">R$ 0</strong><span id="dashKpiFeesSub" style="color:var(--muted)">—</span></div><span class="ico orange">%</span></div></div>
       <div class="kpi" id="kpi-freight-ratio"><div class="kpi-top"><div><small>Frete sobre valor da mercadoria</small><strong id="dashKpiFreightRatio">—</strong><span id="dashKpiFreightRatioSub" style="color:var(--muted)">—</span></div><span class="ico blue">÷</span></div></div>
+      <div class="kpi" id="kpi-purchases"><div class="kpi-top"><div><small>Compras (recebimento por compra)</small><strong id="dashKpiPurchases">0</strong><span id="dashKpiPurchasesSub" style="color:var(--muted)">—</span></div><span class="ico orange">↙</span></div></div>
+      <div class="kpi" id="kpi-shipments"><div class="kpi-top"><div><small>Envios (frete de envio)</small><strong id="dashKpiShipments">0</strong><span id="dashKpiShipmentsSub" style="color:var(--muted)">—</span></div><span class="ico green">↗</span></div></div>
+      <div class="kpi" id="kpi-cost-inbound"><div class="kpi-top"><div><small>Custo inbound (compras)</small><strong id="dashKpiCostInbound">R$ 0</strong><span id="dashKpiCostInboundSub" style="color:var(--muted)">—</span></div><span class="ico orange">↙</span></div></div>
+      <div class="kpi" id="kpi-cost-outbound"><div class="kpi-top"><div><small>Custo outbound (envios)</small><strong id="dashKpiCostOutbound">R$ 0</strong><span id="dashKpiCostOutboundSub" style="color:var(--muted)">—</span></div><span class="ico green">↗</span></div></div>
+      <div class="kpi" id="kpi-fees-other"><div class="kpi-top"><div><small>Despesas extras (TDE, TDA, TRT, zona rural etc. — sem GRIS, ad valorem, pedágio e ICMS)</small><strong id="dashKpiFeesOther">R$ 0</strong><span id="dashKpiFeesOtherSub" style="color:var(--muted)">—</span></div><span class="ico orange">%</span></div></div>
+      <div class="kpi" id="kpi-avg-ticket"><div class="kpi-top"><div><small>Ticket médio por envio</small><strong id="dashKpiAvgTicket">—</strong><span id="dashKpiAvgTicketSub" style="color:var(--muted)">—</span></div><span class="ico blue">⊙</span></div></div>
+      <div class="kpi" id="kpi-delivery-freq"><div class="kpi-top"><div><small>Frequência de entregas</small><strong id="dashKpiDeliveryFreq">—</strong><span id="dashKpiDeliveryFreqSub" style="color:var(--muted)">—</span></div><span class="ico blue">⟳</span></div></div>
     </div>
     <div class="grid">
       <div class="card"><div class="card-h"><h3>Entregas por status</h3></div><div class="card-b donut-wrap"><div class="donut" id="dashDonut"><div class="donut-center"><div><b id="dashDonutTotal" style="font-size:22px">0</b><br><small>Total</small></div></div></div><div class="legend" id="dashDonutLegend"></div></div></div>
       <div class="card"><div class="card-h"><h3>Entrega no prazo por transportadora</h3></div><div class="card-b" id="dashCarrierBars"><div class="tracking-carrier-empty">Sem dados suficientes no período.</div></div></div>
       <div class="card"><div class="card-h"><h3>Custo de frete por filial</h3></div><div class="card-b columns" id="dashBranchCost"></div></div>
     </div>
+    <div class="card" style="margin-top:12px" id="card-freight-ratio-breakdown"><div class="card-h"><h3>Frete/Mercadoria por filial e transportadora</h3></div><div class="card-b" style="display:grid;grid-template-columns:1fr 1fr;gap:20px"><div><small style="color:var(--muted);display:block;margin-bottom:8px">Por filial</small><div id="dashFreightRatioBranch"><div class="tracking-carrier-empty">Sem dados suficientes no período.</div></div></div><div><small style="color:var(--muted);display:block;margin-bottom:8px">Por transportadora</small><div id="dashFreightRatioCarrier"><div class="tracking-carrier-empty">Sem dados suficientes no período.</div></div></div></div></div>
     <div class="card" style="margin-top:12px"><div class="card-h"><h3>Alertas de prazo</h3></div><div class="card-b" id="dashAlerts"><div class="tracking-carrier-empty">Nenhum alerta no período.</div></div></div>
   </section>
 
@@ -2521,7 +2529,7 @@ function qiveReportData(){
     const delivered=status.kind==='delivered'?reportIsoDate(latest.date):'';
     const slaLabel=reportSlaLabel(status,forecast,delivered);
     const nfeValue=nfes.reduce((sum,item)=>sum+trackingNumber(item.document?.operational?.totalValue),0);
-    return {source:'cte',carrier:doc.emitter?.name||'Não informada',destination:route.to,deliveryLocation:route.delivery.label,deliveryLocationSource:route.delivery.source||'',paidByCarmak:payer.paidByCarmak,paidByCarmakLabel:payer.paidByCarmak?'SIM':'NÃO',payer:payer.name,branchCnpj:resolved.cnpj,relatedBranchCnpjs:resolved.relatedCnpjs,order:trackingPurchaseOrders(doc).map(order=>order.number).join(', '),nfe:nfes.map(item=>item.number).filter(Boolean).join(', ')||'—',cte:String(doc.number||''),series:String(doc.operational?.series||''),accessKey:String(doc.accessKey||''),emission:reportIsoDate(doc.emissionDate),forecast:reportIsoDate(forecast),delivered,operational,sla:slaLabel,freight:doc.operational?.freightValue||'',extraFees:doc.operational?.extraFees||0,nfeValue,weight:doc.operational?.weight||'',cubedWeight:doc.operational?.cubedWeight||'',goodsValue:doc.operational?.cargoValue||'',volumes:doc.operational?.volumes||'',leadTime:delivered?reportLeadTime(doc.emissionDate,delivered):'',branch:resolved.label,branchOrigin:doc.operational?.sender?.name||route.from,originCity:route.from,operation:operation.label,cargoType:cargo.label,cargoProduct:cargo.product,costCenter:'',priority:''};
+    return {source:'cte',carrier:doc.emitter?.name||'Não informada',destination:route.to,deliveryLocation:route.delivery.label,deliveryLocationSource:route.delivery.source||'',paidByCarmak:payer.paidByCarmak,paidByCarmakLabel:payer.paidByCarmak?'SIM':'NÃO',payer:payer.name,branchCnpj:resolved.cnpj,relatedBranchCnpjs:resolved.relatedCnpjs,order:trackingPurchaseOrders(doc).map(order=>order.number).join(', '),nfe:nfes.map(item=>item.number).filter(Boolean).join(', ')||'—',cte:String(doc.number||''),series:String(doc.operational?.series||''),accessKey:String(doc.accessKey||''),emission:reportIsoDate(doc.emissionDate),forecast:reportIsoDate(forecast),delivered,operational,sla:slaLabel,freight:doc.operational?.freightValue||'',extraFees:doc.operational?.extraFees||0,feeComponents:Array.isArray(doc.operational?.feeComponents)?doc.operational.feeComponents:[],nfeValue,weight:doc.operational?.weight||'',cubedWeight:doc.operational?.cubedWeight||'',goodsValue:doc.operational?.cargoValue||'',volumes:doc.operational?.volumes||'',leadTime:delivered?reportLeadTime(doc.emissionDate,delivered):'',branch:resolved.label,branchOrigin:doc.operational?.sender?.name||route.from,originCity:route.from,operation:operation.label,cargoType:cargo.label,cargoProduct:cargo.product,costCenter:'',priority:''};
   });
 }
 function reportBaseData(){
@@ -2689,6 +2697,30 @@ function renderDashboardBranchCost(rows){
   const max=Math.max(1,...branches.map(item=>item.value));
   container.innerHTML=branches.length?branches.map(item=>`<div class="col"><div style="height:${Math.max(4,Math.round(item.value/max*150))}px"></div>R$ ${(item.value/1000).toLocaleString('pt-BR',{maximumFractionDigits:0})}k<br>${esc(item.name)}</div>`).join(''):'<div class="tracking-carrier-empty">Sem dados suficientes no período.</div>';
 }
+function renderDashboardFreightRatioBreakdown(rows){
+  const branchContainer=document.getElementById('dashFreightRatioBranch');
+  const carrierContainer=document.getElementById('dashFreightRatioCarrier');
+  if(!branchContainer&&!carrierContainer)return;
+  const build=key=>{
+    const groups=new Map();
+    rows.filter(row=>row.paidByCarmak===true).forEach(row=>{
+      const name=row[key]||'Não identificada';
+      const cargo=reportNumber(row.nfeValue)||reportNumber(row.goodsValue);
+      if(!cargo)return;
+      if(!groups.has(name))groups.set(name,{freight:0,cargo:0});
+      const group=groups.get(name);
+      group.freight+=reportNumber(row.freight);
+      group.cargo+=cargo;
+    });
+    return Array.from(groups.entries()).filter(([,group])=>group.cargo>0).map(([name,group])=>({name,pct:group.freight/group.cargo*100})).sort((a,b)=>b.pct-a.pct).slice(0,5);
+  };
+  const render=(container,list)=>{
+    if(!container)return;
+    container.innerHTML=list.length?list.map(item=>`<div class="barrow"><span>${esc(item.name)}</span><div class="barbg"><div class="barfill" style="width:${Math.min(100,item.pct).toFixed(1)}%"></div></div><b>${item.pct.toLocaleString('pt-BR',{maximumFractionDigits:2})}%</b></div>`).join(''):'<div class="tracking-carrier-empty">Sem dados suficientes no período.</div>';
+  };
+  render(branchContainer,build('branch'));
+  render(carrierContainer,build('carrier'));
+}
 function renderDashboardAlerts(rows){
   const container=document.getElementById('dashAlerts');
   if(!container)return;
@@ -2726,6 +2758,36 @@ function renderDashboard(){
   setText('dashKpiOtd',otd==null?'—':otd.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%');setText('dashKpiOtdSub',slaRows.length?`${slaRows.length.toLocaleString('pt-BR')} CT-es com previsão`:'Nenhum CT-e com previsão');
   setText('dashKpiFees','R$ '+reportMoney(extraFeesSum));setText('dashKpiFeesSub',paidRows.length?`${paidRows.length.toLocaleString('pt-BR')} CT-e${paidRows.length===1?'':'s'} pagos pela Carmak`:'Sem CT-es pagos pela Carmak');
   setText('dashKpiFreightRatio',freightRatio==null?'—':freightRatio.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%');setText('dashKpiFreightRatioSub',nfeValueSum?`R$ ${reportMoney(freight)} frete / R$ ${reportMoney(nfeValueSum)} em mercadoria`:'Sem valor de NF-e vinculado');
+  const purchaseRows=rows.filter(row=>row.operation==='Recebimento por compra');
+  const purchaseFreight=purchaseRows.filter(row=>row.paidByCarmak===true).reduce((sum,row)=>sum+reportNumber(row.freight),0);
+  setText('dashKpiPurchases',purchaseRows.length.toLocaleString('pt-BR'));
+  setText('dashKpiPurchasesSub',purchaseRows.length?`R$ ${reportMoney(purchaseFreight)} pagos pela Carmak`:'Sem CT-es de compra no período');
+  const shipmentRows=rows.filter(row=>row.operation==='Frete de envio');
+  const shipmentFreight=shipmentRows.filter(row=>row.paidByCarmak===true).reduce((sum,row)=>sum+reportNumber(row.freight),0);
+  setText('dashKpiShipments',shipmentRows.length.toLocaleString('pt-BR'));
+  setText('dashKpiShipmentsSub',shipmentRows.length?`R$ ${reportMoney(shipmentFreight)} pagos pela Carmak`:'Sem CT-es de envio no período');
+  setText('dashKpiCostInbound','R$ '+reportMoney(purchaseFreight));
+  setText('dashKpiCostInboundSub',purchaseRows.length?`${purchaseRows.length.toLocaleString('pt-BR')} CT-e${purchaseRows.length===1?'':'s'} de compra (fornecedor → Carmak)`:'Sem CT-es de compra no período');
+  setText('dashKpiCostOutbound','R$ '+reportMoney(shipmentFreight));
+  setText('dashKpiCostOutboundSub',shipmentRows.length?`${shipmentRows.length.toLocaleString('pt-BR')} CT-e${shipmentRows.length===1?'':'s'} de envio (Carmak → cliente)`:'Sem CT-es de envio no período');
+  const otherFeesExclude=/frete|gris|ad\s*valor|pedagi|icms/i;
+  const otherFeesSum=paidRows.reduce((sum,row)=>{
+    const components=Array.isArray(row.feeComponents)?row.feeComponents:[];
+    const filtered=components.filter(component=>!otherFeesExclude.test(String(component?.name||'')));
+    return sum+filtered.reduce((s,component)=>s+reportNumber(component?.value),0);
+  },0);
+  setText('dashKpiFeesOther','R$ '+reportMoney(otherFeesSum));
+  setText('dashKpiFeesOtherSub',paidRows.length?`${paidRows.length.toLocaleString('pt-BR')} CT-e${paidRows.length===1?'':'s'} · TDE, TDA, TRT, zona rural e outras (exclui GRIS, ad valorem, pedágio, ICMS)`:'Sem CT-es pagos pela Carmak');
+  const shipmentTicketValues=shipmentRows.map(row=>reportNumber(row.nfeValue)||reportNumber(row.goodsValue)).filter(value=>value>0);
+  const avgTicket=shipmentTicketValues.length?shipmentTicketValues.reduce((a,b)=>a+b,0)/shipmentTicketValues.length:null;
+  setText('dashKpiAvgTicket',avgTicket==null?'—':'R$ '+reportMoney(avgTicket));
+  setText('dashKpiAvgTicketSub',shipmentTicketValues.length?`Média de ${shipmentTicketValues.length.toLocaleString('pt-BR')} envio${shipmentTicketValues.length===1?'':'s'} com valor de mercadoria vinculado`:'Sem valor de mercadoria vinculado');
+  const periodFromEl=document.getElementById('trackingDateFrom'),periodToEl=document.getElementById('trackingDateTo');
+  const periodFromDate=periodFromEl?.value?new Date(periodFromEl.value):null,periodToDate=periodToEl?.value?new Date(periodToEl.value):null;
+  const periodDays=(periodFromDate&&periodToDate&&!Number.isNaN(periodFromDate.getTime())&&!Number.isNaN(periodToDate.getTime()))?Math.max(1,Math.round((periodToDate-periodFromDate)/86400000)+1):null;
+  const deliveryFrequency=periodDays?delivered/periodDays:null;
+  setText('dashKpiDeliveryFreq',deliveryFrequency==null?'—':deliveryFrequency.toLocaleString('pt-BR',{maximumFractionDigits:1})+'/dia');
+  setText('dashKpiDeliveryFreqSub',periodDays?`${delivered.toLocaleString('pt-BR')} entrega${delivered===1?'':'s'} em ${periodDays} dia${periodDays===1?'':'s'}`:'Defina o período na aba Rastreamento');
   const donut=document.getElementById('dashDonut'),donutTotal=document.getElementById('dashDonutTotal'),legend=document.getElementById('dashDonutLegend');
   if(donutTotal)donutTotal.textContent=total.toLocaleString('pt-BR');
   const denom=total||1;
@@ -2734,6 +2796,7 @@ function renderDashboard(){
   if(legend)legend.innerHTML=`<div>🟩 Entregues<br><b>${delivered.toLocaleString('pt-BR')} (${(delivered/denom*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}%)</b></div><div>🟦 Em trânsito<br><b>${transit.toLocaleString('pt-BR')} (${(transit/denom*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}%)</b></div><div>🟥 Ocorrência<br><b>${occurrence.toLocaleString('pt-BR')} (${(occurrence/denom*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}%)</b></div><div>⬛ Sem rastreamento<br><b>${noTracking.toLocaleString('pt-BR')} (${(noTracking/denom*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}%)</b></div>`;
   renderDashboardCarrierBars(rows);
   renderDashboardBranchCost(rows);
+  renderDashboardFreightRatioBreakdown(rows);
   renderDashboardAlerts(rows);
 }
 async function initializeDashboardPage(){
